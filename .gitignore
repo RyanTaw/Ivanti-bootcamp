@@ -1,0 +1,32 @@
+# Terraform
+
+# Terraform working directory
+**/.terraform/
+
+# Terraform state
+*.tfstate
+*.tfstate.*
+
+# Terraform plans
+tfplan
+*.tfplan
+tfplan.json
+**/.terraform**
+**/.terraform/**
+
+#variable files
+terraform.tfvars
+terraform.tfvars.json
+*.auto.tfvars
+*.auto.tfvars.json
+
+#lock file
+!.terraform.lock.hcl
+
+# Visual Studio Code
+.vscode/
+
+# Visual Studio
+.vs/
+bin/
+obj/
