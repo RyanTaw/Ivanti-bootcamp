@@ -89,3 +89,11 @@ stages:
             env:
               TF_VAR_sql_admin_username: $(sqlAdminUsername)
               TF_VAR_sql_admin_password: $(sqlAdminPassword)
+
+          - task: PublishBuildArtifacts@1
+            displayName: Publish Terraform Plan Files
+            condition: always()
+            inputs:
+              PathtoPublish: '$(Build.SourcesDirectory)/terraform/modules/template1'
+              ArtifactName: 'terraform-plan-${{ parameters.environment }}'
+              publishLocation: Container
