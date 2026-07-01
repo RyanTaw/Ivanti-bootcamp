@@ -30,7 +30,7 @@ parameters:
     default: false
 
 variables:
-  azureServiceConnection: 'avanti-bootcamp'
+  azureServiceConnection: 'develop'
 
   terraformDirectory: '$(Build.SourcesDirectory)/terraform'
 
