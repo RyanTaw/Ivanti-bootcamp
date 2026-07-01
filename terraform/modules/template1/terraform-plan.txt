@@ -5,119 +5,6 @@ plan. Resource actions are indicated with the following symbols:
 
 Terraform will perform the following actions:
 
-  # azurerm_container_registry.acr will be created
-  + resource "azurerm_container_registry" "acr" {
-      + admin_enabled                 = false
-      + admin_password                = (sensitive value)
-      + admin_username                = (known after apply)
-      + data_endpoint_host_names      = (known after apply)
-      + encryption                    = (known after apply)
-      + export_policy_enabled         = true
-      + id                            = (known after apply)
-      + location                      = "eastus"
-      + login_server                  = (known after apply)
-      + name                          = "avantibootcampdevacr"
-      + network_rule_bypass_option    = "AzureServices"
-      + network_rule_set              = (known after apply)
-      + public_network_access_enabled = true
-      + resource_group_name           = "avanti-bootcamp-dev-rg"
-      + sku                           = "Basic"
-      + tags                          = {
-          + "Email"       = "ryan4shift@gmail.com"
-          + "Environment" = "DEV"
-          + "Owner"       = "ryan4shift@gmail.com"
-          + "Project"     = "bootcamp"
-        }
-      + trust_policy_enabled          = false
-      + zone_redundancy_enabled       = false
-    }
-
-  # azurerm_dns_zone.dns will be created
-  + resource "azurerm_dns_zone" "dns" {
-      + id                        = (known after apply)
-      + max_number_of_record_sets = (known after apply)
-      + name                      = "avanti-bootcamp-dev.com"
-      + name_servers              = (known after apply)
-      + number_of_record_sets     = (known after apply)
-      + resource_group_name       = "avanti-bootcamp-dev-rg"
-      + tags                      = {
-          + "Email"       = "ryan4shift@gmail.com"
-          + "Environment" = "DEV"
-          + "Owner"       = "ryan4shift@gmail.com"
-          + "Project"     = "bootcamp"
-        }
-
-      + soa_record (known after apply)
-    }
-
-  # azurerm_key_vault.kv will be created
-  + resource "azurerm_key_vault" "kv" {
-      + access_policy                 = (known after apply)
-      + enable_rbac_authorization     = true
-      + id                            = (known after apply)
-      + location                      = "eastus"
-      + name                          = "avantibootcampdevkv"
-      + public_network_access_enabled = true
-      + rbac_authorization_enabled    = (known after apply)
-      + resource_group_name           = "avanti-bootcamp-dev-rg"
-      + sku_name                      = "standard"
-      + soft_delete_retention_days    = 90
-      + tags                          = {
-          + "Email"       = "ryan4shift@gmail.com"
-          + "Environment" = "DEV"
-          + "Owner"       = "ryan4shift@gmail.com"
-          + "Project"     = "bootcamp"
-        }
-      + tenant_id                     = "0de2b198-522f-47c8-a44b-d3a98712404f"
-      + vault_uri                     = (known after apply)
-
-      + contact (known after apply)
-
-      + network_acls (known after apply)
-    }
-
-  # azurerm_key_vault_secret.sql_admin_password will be created
-  + resource "azurerm_key_vault_secret" "sql_admin_password" {
-      + content_type            = "Terraform Managed"
-      + id                      = (known after apply)
-      + key_vault_id            = (known after apply)
-      + name                    = "sql-admin-password"
-      + resource_id             = (known after apply)
-      + resource_versionless_id = (known after apply)
-      + value                   = (sensitive value)
-      + value_wo                = (write-only attribute)
-      + version                 = (known after apply)
-      + versionless_id          = (known after apply)
-    }
-
-  # azurerm_key_vault_secret.sql_admin_username will be created
-  + resource "azurerm_key_vault_secret" "sql_admin_username" {
-      + content_type            = "Terraform Managed"
-      + id                      = (known after apply)
-      + key_vault_id            = (known after apply)
-      + name                    = "sql-admin-username"
-      + resource_id             = (known after apply)
-      + resource_versionless_id = (known after apply)
-      + value                   = (sensitive value)
-      + value_wo                = (write-only attribute)
-      + version                 = (known after apply)
-      + versionless_id          = (known after apply)
-    }
-
-  # azurerm_key_vault_secret.tenant_id will be created
-  + resource "azurerm_key_vault_secret" "tenant_id" {
-      + content_type            = "Terraform Managed"
-      + id                      = (known after apply)
-      + key_vault_id            = (known after apply)
-      + name                    = "tenant-id"
-      + resource_id             = (known after apply)
-      + resource_versionless_id = (known after apply)
-      + value                   = (sensitive value)
-      + value_wo                = (write-only attribute)
-      + version                 = (known after apply)
-      + versionless_id          = (known after apply)
-    }
-
   # azurerm_kubernetes_cluster.aks will be created
   + resource "azurerm_kubernetes_cluster" "aks" {
       + ai_toolchain_operator_enabled       = false
@@ -184,8 +71,8 @@ Terraform will perform the following actions:
             }
           + type                 = "VirtualMachineScaleSets"
           + ultra_ssd_enabled    = false
-          + vm_size              = "Standard_B2s"
-          + vnet_subnet_id       = (known after apply)
+          + vm_size              = "Standard_DS2_v2"
+          + vnet_subnet_id       = "/subscriptions/f4fc9f16-1394-4eb5-8bfc-9d4f7a26c06b/resourceGroups/avanti-bootcamp-dev-rg/providers/Microsoft.Network/virtualNetworks/avanti-bootcamp-dev-vnet/subnets/avanti-bootcamp-dev-aks-subnet"
           + workload_runtime     = (known after apply)
 
           + upgrade_settings {
@@ -194,7 +81,9 @@ Terraform will perform the following actions:
         }
 
       + identity {
-          + identity_ids = (known after apply)
+          + identity_ids = [
+              + "/subscriptions/f4fc9f16-1394-4eb5-8bfc-9d4f7a26c06b/resourceGroups/avanti-bootcamp-dev-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/avanti-bootcamp-dev-aks-mi",
+            ]
           + principal_id = (known after apply)
           + tenant_id    = (known after apply)
           + type         = "UserAssigned"
@@ -222,7 +111,9 @@ Terraform will perform the following actions:
               + idle_timeout_in_minutes     = 30
               + managed_outbound_ip_count   = (known after apply)
               + managed_outbound_ipv6_count = (known after apply)
-              + outbound_ip_address_ids     = (known after apply)
+              + outbound_ip_address_ids     = [
+                  + "/subscriptions/f4fc9f16-1394-4eb5-8bfc-9d4f7a26c06b/resourceGroups/avanti-bootcamp-dev-rg/providers/Microsoft.Network/publicIPAddresses/avanti-bootcamp-dev-pip",
+                ]
               + outbound_ports_allocated    = 0
             }
 
@@ -232,356 +123,16 @@ Terraform will perform the following actions:
       + node_provisioning_profile (known after apply)
 
       + oms_agent {
-          + log_analytics_workspace_id = (known after apply)
+          + log_analytics_workspace_id = "/subscriptions/f4fc9f16-1394-4eb5-8bfc-9d4f7a26c06b/resourceGroups/avanti-bootcamp-dev-rg/providers/Microsoft.OperationalInsights/workspaces/avanti-bootcamp-dev-log"
           + oms_agent_identity         = (known after apply)
         }
 
       + windows_profile (known after apply)
     }
 
-  # azurerm_log_analytics_workspace.log will be created
-  + resource "azurerm_log_analytics_workspace" "log" {
-      + allow_resource_only_permissions = true
-      + daily_quota_gb                  = -1
-      + id                              = (known after apply)
-      + internet_ingestion_enabled      = true
-      + internet_query_enabled          = true
-      + local_authentication_disabled   = (known after apply)
-      + local_authentication_enabled    = true
-      + location                        = "eastus"
-      + name                            = "avanti-bootcamp-dev-log"
-      + primary_shared_key              = (sensitive value)
-      + resource_group_name             = "avanti-bootcamp-dev-rg"
-      + retention_in_days               = 30
-      + secondary_shared_key            = (sensitive value)
-      + sku                             = "PerGB2018"
-      + tags                            = {
-          + "Email"       = "ryan4shift@gmail.com"
-          + "Environment" = "DEV"
-          + "Owner"       = "ryan4shift@gmail.com"
-          + "Project"     = "bootcamp"
-        }
-      + workspace_id                    = (known after apply)
-    }
-
-  # azurerm_mssql_database.sql_db will be created
-  + resource "azurerm_mssql_database" "sql_db" {
-      + auto_pause_delay_in_minutes                                = (known after apply)
-      + collation                                                  = (known after apply)
-      + create_mode                                                = "Default"
-      + creation_source_database_id                                = (known after apply)
-      + enclave_type                                               = (known after apply)
-      + geo_backup_enabled                                         = true
-      + id                                                         = (known after apply)
-      + ledger_enabled                                             = (known after apply)
-      + license_type                                               = (known after apply)
-      + maintenance_configuration_name                             = (known after apply)
-      + max_size_gb                                                = (known after apply)
-      + min_capacity                                               = (known after apply)
-      + name                                                       = "avanti-bootcamp-dev-db"
-      + read_replica_count                                         = (known after apply)
-      + read_scale                                                 = (known after apply)
-      + restore_point_in_time                                      = (known after apply)
-      + sample_name                                                = (known after apply)
-      + secondary_type                                             = (known after apply)
-      + server_id                                                  = (known after apply)
-      + sku_name                                                   = "Basic"
-      + storage_account_type                                       = "Geo"
-      + tags                                                       = {
-          + "Email"       = "ryan4shift@gmail.com"
-          + "Environment" = "DEV"
-          + "Owner"       = "ryan4shift@gmail.com"
-          + "Project"     = "bootcamp"
-        }
-      + transparent_data_encryption_enabled                        = true
-      + transparent_data_encryption_key_automatic_rotation_enabled = false
-      + zone_redundant                                             = (known after apply)
-
-      + long_term_retention_policy (known after apply)
-
-      + short_term_retention_policy (known after apply)
-
-      + threat_detection_policy (known after apply)
-    }
-
-  # azurerm_mssql_firewall_rule.allow_azure_services will be created
-  + resource "azurerm_mssql_firewall_rule" "allow_azure_services" {
-      + end_ip_address   = "0.0.0.0"
-      + id               = (known after apply)
-      + name             = "AllowAzureServices"
-      + server_id        = (known after apply)
-      + start_ip_address = "0.0.0.0"
-    }
-
-  # azurerm_mssql_server.sql_server will be created
-  + resource "azurerm_mssql_server" "sql_server" {
-      + administrator_login                      = "admin"
-      + administrator_login_password             = (sensitive value)
-      + administrator_login_password_wo          = (write-only attribute)
-      + connection_policy                        = "Default"
-      + express_vulnerability_assessment_enabled = false
-      + fully_qualified_domain_name              = (known after apply)
-      + id                                       = (known after apply)
-      + location                                 = "eastus"
-      + minimum_tls_version                      = "1.2"
-      + name                                     = "avanti-bootcamp-dev-sql"
-      + outbound_network_restriction_enabled     = false
-      + primary_user_assigned_identity_id        = (known after apply)
-      + public_network_access_enabled            = true
-      + resource_group_name                      = "avanti-bootcamp-dev-rg"
-      + restorable_dropped_database_ids          = (known after apply)
-      + tags                                     = {
-          + "Email"       = "ryan4shift@gmail.com"
-          + "Environment" = "DEV"
-          + "Owner"       = "ryan4shift@gmail.com"
-          + "Project"     = "bootcamp"
-        }
-      + version                                  = "12.0"
-    }
-
-  # azurerm_network_security_group.nsg will be created
-  + resource "azurerm_network_security_group" "nsg" {
-      + id                  = (known after apply)
-      + location            = "eastus"
-      + name                = "avanti-bootcamp-dev-nsg"
-      + resource_group_name = "avanti-bootcamp-dev-rg"
-      + security_rule       = (known after apply)
-      + tags                = {
-          + "Email"       = "ryan4shift@gmail.com"
-          + "Environment" = "DEV"
-          + "Owner"       = "ryan4shift@gmail.com"
-          + "Project"     = "bootcamp"
-        }
-    }
-
-  # azurerm_network_security_rule.allow_http will be created
-  + resource "azurerm_network_security_rule" "allow_http" {
-      + access                      = "Allow"
-      + destination_address_prefix  = "*"
-      + destination_port_range      = "80"
-      + direction                   = "Inbound"
-      + id                          = (known after apply)
-      + name                        = "Allow-HTTP"
-      + network_security_group_name = "avanti-bootcamp-dev-nsg"
-      + priority                    = 100
-      + protocol                    = "Tcp"
-      + resource_group_name         = "avanti-bootcamp-dev-rg"
-      + source_address_prefix       = "*"
-      + source_port_range           = "*"
-    }
-
-  # azurerm_network_security_rule.allow_https will be created
-  + resource "azurerm_network_security_rule" "allow_https" {
-      + access                      = "Allow"
-      + destination_address_prefix  = "*"
-      + destination_port_range      = "443"
-      + direction                   = "Inbound"
-      + id                          = (known after apply)
-      + name                        = "Allow-HTTPS"
-      + network_security_group_name = "avanti-bootcamp-dev-nsg"
-      + priority                    = 110
-      + protocol                    = "Tcp"
-      + resource_group_name         = "avanti-bootcamp-dev-rg"
-      + source_address_prefix       = "*"
-      + source_port_range           = "*"
-    }
-
-  # azurerm_public_ip.cluster_public_ip will be created
-  + resource "azurerm_public_ip" "cluster_public_ip" {
-      + allocation_method       = "Static"
-      + ddos_protection_mode    = "VirtualNetworkInherited"
-      + fqdn                    = (known after apply)
-      + id                      = (known after apply)
-      + idle_timeout_in_minutes = 4
-      + ip_address              = (known after apply)
-      + ip_version              = "IPv4"
-      + location                = "eastus"
-      + name                    = "avanti-bootcamp-dev-pip"
-      + resource_group_name     = "avanti-bootcamp-dev-rg"
-      + sku                     = "Standard"
-      + sku_tier                = "Regional"
-      + tags                    = {
-          + "Email"       = "ryan4shift@gmail.com"
-          + "Environment" = "DEV"
-          + "Owner"       = "ryan4shift@gmail.com"
-          + "Project"     = "bootcamp"
-        }
-      + zones                   = [
-          + "1",
-          + "2",
-          + "3",
-        ]
-    }
-
-  # azurerm_resource_group.rg will be created
-  + resource "azurerm_resource_group" "rg" {
-      + id       = (known after apply)
-      + location = "eastus"
-      + name     = "avanti-bootcamp-dev-rg"
-      + tags     = {
-          + "Email"       = "ryan4shift@gmail.com"
-          + "Environment" = "DEV"
-          + "Owner"       = "ryan4shift@gmail.com"
-          + "Project"     = "bootcamp"
-        }
-    }
-
-  # azurerm_role_assignment.aks_acr_pull will be created
-  + resource "azurerm_role_assignment" "aks_acr_pull" {
-      + condition_version                = (known after apply)
-      + id                               = (known after apply)
-      + name                             = (known after apply)
-      + principal_id                     = (known after apply)
-      + principal_type                   = (known after apply)
-      + role_definition_id               = (known after apply)
-      + role_definition_name             = "AcrPull"
-      + scope                            = (known after apply)
-      + skip_service_principal_aad_check = (known after apply)
-    }
-
-  # azurerm_role_assignment.aks_dns_contributor will be created
-  + resource "azurerm_role_assignment" "aks_dns_contributor" {
-      + condition_version                = (known after apply)
-      + id                               = (known after apply)
-      + name                             = (known after apply)
-      + principal_id                     = (known after apply)
-      + principal_type                   = (known after apply)
-      + role_definition_id               = (known after apply)
-      + role_definition_name             = "DNS Zone Contributor"
-      + scope                            = (known after apply)
-      + skip_service_principal_aad_check = (known after apply)
-    }
-
-  # azurerm_role_assignment.aks_keyvault_secrets_user will be created
-  + resource "azurerm_role_assignment" "aks_keyvault_secrets_user" {
-      + condition_version                = (known after apply)
-      + id                               = (known after apply)
-      + name                             = (known after apply)
-      + principal_id                     = (known after apply)
-      + principal_type                   = (known after apply)
-      + role_definition_id               = (known after apply)
-      + role_definition_name             = "Key Vault Secrets User"
-      + scope                            = (known after apply)
-      + skip_service_principal_aad_check = (known after apply)
-    }
-
-  # azurerm_role_assignment.aks_log_analytics_contributor will be created
-  + resource "azurerm_role_assignment" "aks_log_analytics_contributor" {
-      + condition_version                = (known after apply)
-      + id                               = (known after apply)
-      + name                             = (known after apply)
-      + principal_id                     = (known after apply)
-      + principal_type                   = (known after apply)
-      + role_definition_id               = (known after apply)
-      + role_definition_name             = "Log Analytics Contributor"
-      + scope                            = (known after apply)
-      + skip_service_principal_aad_check = (known after apply)
-    }
-
-  # azurerm_role_assignment.aks_public_ip_network_contributor will be created
-  + resource "azurerm_role_assignment" "aks_public_ip_network_contributor" {
-      + condition_version                = (known after apply)
-      + id                               = (known after apply)
-      + name                             = (known after apply)
-      + principal_id                     = (known after apply)
-      + principal_type                   = (known after apply)
-      + role_definition_id               = (known after apply)
-      + role_definition_name             = "Network Contributor"
-      + scope                            = (known after apply)
-      + skip_service_principal_aad_check = (known after apply)
-    }
-
-  # azurerm_role_assignment.aks_rg_contributor will be created
-  + resource "azurerm_role_assignment" "aks_rg_contributor" {
-      + condition_version                = (known after apply)
-      + id                               = (known after apply)
-      + name                             = (known after apply)
-      + principal_id                     = (known after apply)
-      + principal_type                   = (known after apply)
-      + role_definition_id               = (known after apply)
-      + role_definition_name             = "Contributor"
-      + scope                            = (known after apply)
-      + skip_service_principal_aad_check = (known after apply)
-    }
-
-  # azurerm_role_assignment.aks_vnet_network_contributor will be created
-  + resource "azurerm_role_assignment" "aks_vnet_network_contributor" {
-      + condition_version                = (known after apply)
-      + id                               = (known after apply)
-      + name                             = (known after apply)
-      + principal_id                     = (known after apply)
-      + principal_type                   = (known after apply)
-      + role_definition_id               = (known after apply)
-      + role_definition_name             = "Network Contributor"
-      + scope                            = (known after apply)
-      + skip_service_principal_aad_check = (known after apply)
-    }
-
-  # azurerm_subnet.aks_subnet will be created
-  + resource "azurerm_subnet" "aks_subnet" {
-      + address_prefixes                              = [
-          + "10.0.1.0/24",
-        ]
-      + default_outbound_access_enabled               = true
-      + id                                            = (known after apply)
-      + name                                          = "avanti-bootcamp-dev-aks-subnet"
-      + private_endpoint_network_policies             = "Disabled"
-      + private_link_service_network_policies_enabled = true
-      + resource_group_name                           = "avanti-bootcamp-dev-rg"
-      + virtual_network_name                          = "avanti-bootcamp-dev-vnet"
-    }
-
-  # azurerm_subnet_network_security_group_association.aks_subnet_nsg will be created
-  + resource "azurerm_subnet_network_security_group_association" "aks_subnet_nsg" {
-      + id                        = (known after apply)
-      + network_security_group_id = (known after apply)
-      + subnet_id                 = (known after apply)
-    }
-
-  # azurerm_user_assigned_identity.aks_identity will be created
-  + resource "azurerm_user_assigned_identity" "aks_identity" {
-      + client_id           = (known after apply)
-      + id                  = (known after apply)
-      + location            = "eastus"
-      + name                = "avanti-bootcamp-dev-aks-mi"
-      + principal_id        = (known after apply)
-      + resource_group_name = "avanti-bootcamp-dev-rg"
-      + tags                = {
-          + "Email"       = "ryan4shift@gmail.com"
-          + "Environment" = "DEV"
-          + "Owner"       = "ryan4shift@gmail.com"
-          + "Project"     = "bootcamp"
-        }
-      + tenant_id           = (known after apply)
-    }
-
-  # azurerm_virtual_network.vnet will be created
-  + resource "azurerm_virtual_network" "vnet" {
-      + address_space                  = [
-          + "10.0.0.0/16",
-        ]
-      + dns_servers                    = (known after apply)
-      + guid                           = (known after apply)
-      + id                             = (known after apply)
-      + location                       = "eastus"
-      + name                           = "avanti-bootcamp-dev-vnet"
-      + private_endpoint_vnet_policies = "Disabled"
-      + resource_group_name            = "avanti-bootcamp-dev-rg"
-      + subnet                         = (known after apply)
-      + tags                           = {
-          + "Email"       = "ryan4shift@gmail.com"
-          + "Environment" = "DEV"
-          + "Owner"       = "ryan4shift@gmail.com"
-          + "Project"     = "bootcamp"
-        }
-    }
-
-Plan: 27 to add, 0 to change, 0 to destroy.
+Plan: 1 to add, 0 to change, 0 to destroy.
 
 Changes to Outputs:
-  + acr_name            = "avantibootcampdevacr"
-  + aks_cluster_name    = "avanti-bootcamp-dev-aks"
-  + key_vault_name      = "avantibootcampdevkv"
-  + resource_group_name = "avanti-bootcamp-dev-rg"
-  + sql_database_name   = "avanti-bootcamp-dev-db"
-  + sql_server_name     = "avanti-bootcamp-dev-sql"
+  - key_vault_name      = "avantibootcampdevkv" -> null
+  - sql_database_name   = "avanti-bootcamp-dev-db" -> null
+  - sql_server_name     = "avanti-bootcamp-dev-sql" -> null

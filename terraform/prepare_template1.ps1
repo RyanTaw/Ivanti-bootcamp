@@ -75,22 +75,22 @@ try {
 
     if ($Apply) {
         Write-Host ""
-        Write-Host "Applying Terraform..." -ForegroundColor Green
+        Write-Host "Applying Terraform..."
 
         terraform apply -auto-approve $planFile
 
         if ($LASTEXITCODE -ne 0) {
-            throw "Terraform apply failed."
+            throw "Terraform apply failed"
         }
 
         Write-Host ""
-        Write-Host "Deployment completed successfully." -ForegroundColor Green
+        Write-Host "Deployment completed successfully"
     }
     else {
         Write-Host ""
-        Write-Host "Plan completed successfully." -ForegroundColor Yellow
+        Write-Host "Plan completed successfully"
         Write-Host "To deploy, run:"
-        Write-Host ".\prepare_template1.ps1 $Environment -Apply"
+        Write-Host ".\prepare_template1.ps1 $Environment -apply"
     }
 }
 finally {

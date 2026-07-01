@@ -27,7 +27,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
 
   default_node_pool {
     name                 = "bootcamp"
-    vm_size              = "Standard_B2s"
+    vm_size              = "Standard_DS2_v2"
     type                 = "VirtualMachineScaleSets"
     vnet_subnet_id       = azurerm_subnet.aks_subnet.id
     max_pods             = 5
