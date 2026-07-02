@@ -288,6 +288,8 @@ stages:
               scriptType: bash
               scriptLocation: inlineScript
               inlineScript: |
+                set -e
+
                 az aks get-credentials \
                   --resource-group "$(resourceGroupName)" \
                   --name "$(aksClusterName)" \
@@ -297,10 +299,10 @@ stages:
                 kubectl apply -f "$(weatherDeploymentManifest)"
 
                 kubectl set image deployment/$(webDeploymentName) \
-                  $(webContainerName)="$(containerRegistry)/$(webImageRepository):$(imageTag)"
+                  "$(webContainerName)=$(containerRegistry)/$(webImageRepository):$(imageTag)"
 
                 kubectl set image deployment/$(weatherDeploymentName) \
-                  $(weatherContainerName)="$(containerRegistry)/$(weatherImageRepository):$(imageTag)"
+                  "$(weatherContainerName)=$(containerRegistry)/$(weatherImageRepository):$(imageTag)"
 
                 kubectl rollout status deployment/$(webDeploymentName)
                 kubectl rollout status deployment/$(weatherDeploymentName)
