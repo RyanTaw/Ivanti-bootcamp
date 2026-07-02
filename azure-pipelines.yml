@@ -30,7 +30,7 @@ parameters:
     default: false
 
 variables:
-  azureServiceConnection: 'f4fc9f16-1394-4eb5-8bfc-9d4f7a26c06b'
+  azureServiceConnection: 'avanti-bootcamp'
 
   terraformDirectory: '$(Build.SourcesDirectory)/terraform'
 
@@ -87,11 +87,3 @@ stages:
             env:
               TF_VAR_sql_admin_username: $(sqlAdminUsername)
               TF_VAR_sql_admin_password: $(sqlAdminPassword)
-
-          - task: PublishBuildArtifacts@1
-            displayName: Publish Terraform Plan Files
-            condition: always()
-            inputs:
-              PathtoPublish: '$(Build.SourcesDirectory)/terraform/modules/template1'
-              ArtifactName: 'terraform-plan-${{ parameters.environment }}'
-              publishLocation: Container
