@@ -11,42 +11,6 @@ pr:
 resources:
   - repo: self
 
-variables:
-  - group: bootcamp-dev
-
-  - name: azureServiceConnection
-    value: 'avanti-bootcamp'
-
-  - name: terraformDirectory
-    value: '$(Build.SourcesDirectory)/terraform'
-
-  - name: acrName
-    value: 'avantibootcampdevacr'
-
-  - name: containerRegistry
-    value: 'avantibootcampdevacr.azurecr.io'
-
-  - name: imageRepository
-    value: 'aivantibootcampimg'
-
-  - name: dockerfilePath
-    value: '$(Build.SourcesDirectory)/Dockerfile'
-
-  - name: tag
-    value: '$(Build.BuildId)'
-
-  - name: resourceGroupName
-    value: 'avanti-bootcamp-dev-rg'
-
-  - name: aksClusterName
-    value: 'avanti-bootcamp-dev-aks'
-
-  - name: imagePullSecret
-    value: 'avanti-acr-auth'
-
-  - name: vmImageName
-    value: 'ubuntu-latest'
-
 parameters:
   - name: environment
     displayName: Environment
@@ -60,15 +24,57 @@ parameters:
     type: boolean
     default: false
 
-env:
-  TF_VAR_tenant_id: $(TF_VAR_tenant_id)
-  TF_VAR_sql_admin_username: $(sqlAdminUsername)
-  TF_VAR_sql_admin_password: $(sqlAdminPassword)
+variables:
+  - group: bootcamp-dev
 
+  - name: azureServiceConnection
+    value: 'avanti-bootcamp'
+
+  - name: terraformDirectory
+    value: '$(Build.SourcesDirectory)/terraform'
+
+  - name: appDirectory
+    value: '$(Build.SourcesDirectory)/dotnet-container-app'
+
+  - name: solutionPath
+    value: '$(appDirectory)/ContainerApp.sln'
+
+  - name: dockerfilePath
+    value: '$(appDirectory)/src/ContainerApp.TodoApi/Dockerfile'
+
+  - name: dockerBuildContext
+    value: '$(appDirectory)'
+
+  - name: acrName
+    value: 'avantibootcampdevacr'
+
+  - name: containerRegistry
+    value: 'avantibootcampdevacr.azurecr.io'
+
+  - name: imageRepository
+    value: 'aivantibootcampimg'
+
+  - name: imageTag
+    value: '$(Build.BuildId)'
+
+  - name: resourceGroupName
+    value: 'avanti-bootcamp-dev-rg'
+
+  - name: aksClusterName
+    value: 'avanti-bootcamp-dev-aks'
+
+  - name: deploymentName
+    value: 'containerapp-todoapi'
+
+  - name: containerName
+    value: 'containerapp-todoapi'
+
+  - name: vmImageName
+    value: 'ubuntu-latest'
 
 stages:
   - stage: Terraform
-    displayName: Terraform Plan & Apply
+    displayName: Terraform Plan Apply
     jobs:
       - job: TerraformJob
         displayName: Terraform Job
@@ -91,9 +97,9 @@ stages:
               scriptLocation: inlineScript
               workingDirectory: '$(terraformDirectory)'
               inlineScript: |
-                Write-Host "Running Terraform PLAN for ${{ parameters.environment }}"
                 .\prepare_template1.ps1 ${{ parameters.environment }}
             env:
+              TF_VAR_tenant_id: $(tenantId)
               TF_VAR_sql_admin_username: $(sqlAdminUsername)
               TF_VAR_sql_admin_password: $(sqlAdminPassword)
 
@@ -114,8 +120,103 @@ stages:
               scriptLocation: inlineScript
               workingDirectory: '$(terraformDirectory)'
               inlineScript: |
-                Write-Host "Running Terraform APPLY for ${{ parameters.environment }}"
                 .\prepare_template1.ps1 ${{ parameters.environment }} -Apply
             env:
+              TF_VAR_tenant_id: $(tenantId)
               TF_VAR_sql_admin_username: $(sqlAdminUsername)
               TF_VAR_sql_admin_password: $(sqlAdminPassword)
+
+  - stage: DotNetBuildTest
+    displayName: Build and Test .NET App
+    dependsOn: Terraform
+    condition: succeeded()
+    jobs:
+      - job: BuildTest
+        displayName: Build and Test
+        pool:
+          vmImage: $(vmImageName)
+
+        steps:
+          - checkout: self
+
+          - task: UseDotNet@2
+            displayName: Install .NET SDK
+            inputs:
+              packageType: sdk
+              version: '8.x'
+
+          - script: |
+              dotnet restore "$(solutionPath)"
+              dotnet build "$(solutionPath)" --configuration Release --no-restore
+              dotnet test "$(solutionPath)" --configuration Release --no-build --logger trx
+            displayName: Restore Build Test
+
+          - task: PublishTestResults@2
+            displayName: Publish Test Results
+            condition: always()
+            inputs:
+              testResultsFormat: VSTest
+              testResultsFiles: '**/*.trx'
+
+  - stage: DockerBuildPush
+    displayName: Build and Push Docker Image
+    dependsOn: DotNetBuildTest
+    condition: succeeded()
+    jobs:
+      - job: DockerBuild
+        displayName: Docker Build Push
+        pool:
+          vmImage: $(vmImageName)
+
+        steps:
+          - checkout: self
+
+          - task: AzureCLI@2
+            displayName: Build and Push to ACR
+            inputs:
+              azureSubscription: '$(azureServiceConnection)'
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                az acr login --name $(acrName)
+
+                docker build \
+                  -f "$(dockerfilePath)" \
+                  -t "$(containerRegistry)/$(imageRepository):$(imageTag)" \
+                  -t "$(containerRegistry)/$(imageRepository):latest" \
+                  "$(dockerBuildContext)"
+
+                docker push "$(containerRegistry)/$(imageRepository):$(imageTag)"
+                docker push "$(containerRegistry)/$(imageRepository):latest"
+
+  - stage: DeployToAKS
+    displayName: Deploy to AKS
+    dependsOn: DockerBuildPush
+    condition: succeeded()
+    jobs:
+      - job: Deploy
+        displayName: Deploy App to AKS
+        pool:
+          vmImage: $(vmImageName)
+
+        steps:
+          - checkout: self
+
+          - task: AzureCLI@2
+            displayName: Deploy to Kubernetes
+            inputs:
+              azureSubscription: '$(azureServiceConnection)'
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                az aks get-credentials \
+                  --resource-group "$(resourceGroupName)" \
+                  --name "$(aksClusterName)" \
+                  --overwrite-existing
+
+                kubectl apply -f "$(appDirectory)/src/ContainerApp.TodoApi/k8s-deployment.yaml"
+
+                kubectl set image deployment/$(deploymentName) \
+                  $(containerName)="$(containerRegistry)/$(imageRepository):$(imageTag)"
+
+                kubectl rollout status deployment/$(deploymentName)

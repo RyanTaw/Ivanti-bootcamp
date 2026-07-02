@@ -7,7 +7,7 @@ variable "location" {
 }
 
 variable "tenant_id" {
-  type = string
+  type    = string
   default = "0de2b198-522f-47c8-a44b-d3a98712404f"
 }
 
@@ -28,7 +28,6 @@ variable "key_vault_name" {
 variable "environment" {
   description = "Deployment environment."
   type        = string
-  default     = "DEV"
 }
 
 variable "project_name" {

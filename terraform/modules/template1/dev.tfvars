@@ -1,6 +1,9 @@
-resource_name = "bootcamp-dev"
-environment   = "DEV"
-location      = "eastus"
-
+resource_name      = "avanti-bootcamp"
+location           = "eastus"
+tenant_id          = "0de2b198-522f-47c8-a44b-d3a98712404f"
+environment        = "dev"
+project_name       = "bootcamp"
+owner_email        = "ryan4shift@gmail.com"
+key_vault_name     = "avantibootcampdevkv"
 sql_admin_username = "admin"
 sql_admin_password = "Ryan123!"
