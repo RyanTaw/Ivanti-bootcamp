@@ -1,18 +1,12 @@
 param(
     [Parameter(Mandatory = $true, Position = 0)]
-    [ValidateSet("DEV", "QA", "UAT", "PROD")]
+    [ValidateSet("DEV", "QA", "PROD")]
     [string]$Environment,
 
-    [switch]$Apply,
-
-    [switch]$Destroy
+    [switch]$Apply
 )
 
 $ErrorActionPreference = "Stop"
-
-if ($Apply -and $Destroy) {
-    throw "Use either -Apply or -Destroy, not both."
-}
 
 $TerraformFolder = Join-Path $PSScriptRoot "modules\template1"
 
@@ -39,56 +33,63 @@ try {
     Write-Host "Folder      : $TerraformFolder"
     Write-Host "Variables   : $tfvars"
     Write-Host "Apply       : $Apply"
-    Write-Host "Destroy     : $Destroy"
-
 
     terraform fmt -recursive
     if ($LASTEXITCODE -ne 0) { throw "Terraform fmt failed." }
+
     terraform init
     if ($LASTEXITCODE -ne 0) { throw "Terraform init failed." }
+
     terraform validate
     if ($LASTEXITCODE -ne 0) { throw "Terraform validate failed." }
 
-    if ($Destroy) {
-        Write-Host "Running terraform destroy"
+    Write-Host "Running terraform plan..."
 
-        terraform plan -destroy "-var-file=$tfvars" "-out=$planFile"
-    }
-    else {
-        Write-Host "Running terraform plan..."
+    terraform plan "-var-file=$tfvars" "-out=$planFile"
+    $planExitCode = $LASTEXITCODE
 
-        terraform plan "-var-file=$tfvars" "-out=$planFile"
-    }
-
-    if ($LASTEXITCODE -ne 0) {
+    if ($planExitCode -ne 0) {
         throw "Terraform plan failed."
     }
 
+    if (!(Test-Path $planFile)) {
+        throw "Terraform plan file was not created: $TerraformFolder\$planFile"
+    }
+
     terraform show -json $planFile | Out-File -FilePath $planJson -Encoding UTF8
+    $jsonExitCode = $LASTEXITCODE
+
+    if ($jsonExitCode -ne 0) {
+        throw "Terraform JSON plan generation failed."
+    }
+
     terraform show -no-color $planFile | Out-File -FilePath $planText -Encoding UTF8
+    $textExitCode = $LASTEXITCODE
+
+    if ($textExitCode -ne 0) {
+        throw "Terraform text plan generation failed."
+    }
 
     Write-Host "Plan files created:"
     Write-Host "Binary : $TerraformFolder\$planFile"
     Write-Host "JSON   : $TerraformFolder\$planJson"
     Write-Host "Text   : $TerraformFolder\$planText"
 
-    if ($Apply -or $Destroy) {
-        terraform apply -auto-approve $planFile
+    if ($Apply) {
+        Write-Host "Running terraform apply..."
 
-        if ($LASTEXITCODE -ne 0) {
+        terraform apply -auto-approve $planFile
+        $applyExitCode = $LASTEXITCODE
+
+        if ($applyExitCode -ne 0) {
             throw "Terraform apply failed."
         }
-        if ($Destroy) {
-            Write-Host "Destroy complete."
-        }
-        else {
-            Write-Host "Deployment completed successfully."
-        }
+
+        Write-Host "Deployment completed successfully."
     }
     else {
         Write-Host "Plan completed successfully."
-        Write-Host "Deploy:  .\prepare_template1.ps1 $Environment -Apply"
-        Write-Host "Destroy: .\prepare_template1.ps1 $Environment -Destroy"
+        Write-Host "Deploy: .\prepare_template1.ps1 $Environment -Apply"
     }
 }
 finally {
