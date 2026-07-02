@@ -34,7 +34,7 @@ spec:
     spec:
       containers:
         - name: containerapp-weatherapi
-          image: nginx:latest
+          image: avantiavantibootcampacr.azurecr.io/containerapp-weather:latest
           ports:
             - name: http
               containerPort: 80
