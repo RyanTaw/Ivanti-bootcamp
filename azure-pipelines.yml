@@ -1,0 +1,84 @@
+trigger:
+  branches:
+    include:
+      - develop
+
+pr:
+  branches:
+    include:
+      - develop
+
+resources:
+  - repo: self
+
+parameters:
+  - name: environment
+    displayName: Environment
+    type: string
+    default: DEV
+    values:
+      - DEV
+
+  - name: applyTerraform
+    displayName: Apply terraform?
+    type: boolean
+    default: false
+
+variables:
+  azureServiceConnection: 'avanti-bootcamp'
+  terraformDirectory: '$(Build.SourcesDirectory)/terraform'
+  vmImageName: 'ubuntu-latest'
+
+stages:
+  - stage: Terraform
+    displayName: Terraform Plan & Apply
+    jobs:
+      - job: TerraformJob
+        displayName: Terraform Job
+        pool:
+          vmImage: windows-latest
+
+        steps:
+          - checkout: self
+
+          - task: TerraformInstaller@1
+            displayName: Install Terraform
+            inputs:
+              terraformVersion: 'latest'
+
+          - task: AzureCLI@2
+            displayName: Terraform Plan
+            inputs:
+              azureSubscription: '$(azureServiceConnection)'
+              scriptType: ps
+              scriptLocation: inlineScript
+              workingDirectory: '$(terraformDirectory)'
+              inlineScript: |
+                Write-Host "Running Terraform PLAN for ${{ parameters.environment }}"
+                .\prepare_template1.ps1 ${{ parameters.environment }}
+            env:
+              TF_VAR_sql_admin_username: $(sqlAdminUsername)
+              TF_VAR_sql_admin_password: $(sqlAdminPassword)
+
+          - task: PublishBuildArtifacts@1
+            displayName: Publish Terraform Plan Files
+            condition: always()
+            inputs:
+              PathtoPublish: '$(Build.SourcesDirectory)/terraform/modules/template1'
+              ArtifactName: 'terraform-plan-${{ parameters.environment }}'
+              publishLocation: Container
+
+          - task: AzureCLI@2
+            displayName: Terraform Apply
+            condition: and(succeeded(), eq('${{ parameters.applyTerraform }}', 'True'))
+            inputs:
+              azureSubscription: '$(azureServiceConnection)'
+              scriptType: ps
+              scriptLocation: inlineScript
+              workingDirectory: '$(terraformDirectory)'
+              inlineScript: |
+                Write-Host "Running Terraform APPLY for ${{ parameters.environment }}"
+                .\prepare_template1.ps1 ${{ parameters.environment }} -Apply
+            env:
+              TF_VAR_sql_admin_username: $(sqlAdminUsername)
+              TF_VAR_sql_admin_password: $(sqlAdminPassword)
