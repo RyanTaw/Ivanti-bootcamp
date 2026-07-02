@@ -37,13 +37,19 @@ variables:
     value: '$(Build.SourcesDirectory)/dotnet-container-app'
 
   - name: solutionPath
-    value: '$(appDirectory)/ContainerApp.sln'
+    value: '$(appDirectory)/src/ContainerApp.sln'
 
-  - name: dockerfilePath
-    value: '$(appDirectory)/src/ContainerApp.TodoApi/Dockerfile'
+  - name: testProject
+    value: '$(appDirectory)/src/ContainerApp.Test/ContainerApp.Test.csproj'
 
   - name: dockerBuildContext
-    value: '$(appDirectory)'
+    value: '$(appDirectory)/src'
+
+  - name: webDockerfile
+    value: '$(appDirectory)/src/ContainerApp.WebApp/Dockerfile'
+
+  - name: weatherDockerfile
+    value: '$(appDirectory)/src/ContainerApp.WeatherApi/Dockerfile'
 
   - name: acrName
     value: 'avantibootcampdevacr'
@@ -51,8 +57,11 @@ variables:
   - name: containerRegistry
     value: 'avantibootcampdevacr.azurecr.io'
 
-  - name: imageRepository
-    value: 'aivantibootcampimg'
+  - name: webImageRepository
+    value: 'containerapp-web'
+
+  - name: weatherImageRepository
+    value: 'containerapp-weather'
 
   - name: imageTag
     value: '$(Build.BuildId)'
@@ -63,11 +72,23 @@ variables:
   - name: aksClusterName
     value: 'avanti-bootcamp-dev-aks'
 
-  - name: deploymentName
-    value: 'containerapp-todoapi'
+  - name: webDeploymentManifest
+    value: '$(appDirectory)/src/ContainerApp.WebApp/k8s-deployment.yaml'
 
-  - name: containerName
-    value: 'containerapp-todoapi'
+  - name: weatherDeploymentManifest
+    value: '$(appDirectory)/src/ContainerApp.WeatherApi/k8s-deployment.yaml'
+
+  - name: webDeploymentName
+    value: 'containerapp-webapp'
+
+  - name: webContainerName
+    value: 'containerapp-webapp'
+
+  - name: weatherDeploymentName
+    value: 'containerapp-weatherapi'
+
+  - name: weatherContainerName
+    value: 'containerapp-weatherapi'
 
   - name: vmImageName
     value: 'ubuntu-latest'
@@ -143,27 +164,30 @@ stages:
               echo "Build.SourcesDirectory = $(Build.SourcesDirectory)"
               echo "appDirectory = $(appDirectory)"
               echo "solutionPath = $(solutionPath)"
-              echo "dockerfilePath = $(dockerfilePath)"
-              echo "dockerBuildContext = $(dockerBuildContext)"
-              echo ""
-              echo "Current directory:"
-              pwd
-              echo ""
-              echo "Root contents:"
-              ls -la "$(Build.SourcesDirectory)"
-              echo ""
-              echo "Searching for solution files:"
+              echo "testProject = $(testProject)"
+              echo "webDockerfile = $(webDockerfile)"
+              echo "weatherDockerfile = $(weatherDockerfile)"
+
               find "$(Build.SourcesDirectory)" -name "*.sln"
-              echo ""
-              echo "Searching for Dockerfiles:"
               find "$(Build.SourcesDirectory)" -name "Dockerfile"
-              echo ""
+
               if [ ! -f "$(solutionPath)" ]; then
                 echo "ERROR: Solution file not found at $(solutionPath)"
                 exit 1
               fi
-              if [ ! -f "$(dockerfilePath)" ]; then
-                echo "ERROR: Dockerfile not found at $(dockerfilePath)"
+
+              if [ ! -f "$(testProject)" ]; then
+                echo "ERROR: Test project not found at $(testProject)"
+                exit 1
+              fi
+
+              if [ ! -f "$(webDockerfile)" ]; then
+                echo "ERROR: WebApp Dockerfile not found at $(webDockerfile)"
+                exit 1
+              fi
+
+              if [ ! -f "$(weatherDockerfile)" ]; then
+                echo "ERROR: WeatherApi Dockerfile not found at $(weatherDockerfile)"
                 exit 1
               fi
             displayName: Verify Repository Layout
@@ -177,7 +201,7 @@ stages:
           - script: |
               dotnet restore "$(solutionPath)"
               dotnet build "$(solutionPath)" --configuration Release --no-restore
-              dotnet test "$(solutionPath)" --configuration Release --no-build --logger trx
+              dotnet test "$(testProject)" --configuration Release --no-build --logger trx
             displayName: Restore Build Test
 
           - task: PublishTestResults@2
@@ -188,7 +212,7 @@ stages:
               testResultsFiles: '**/*.trx'
 
   - stage: DockerBuildPush
-    displayName: Build and Push Docker Image
+    displayName: Build and Push Docker Images
     dependsOn: DotNetBuildTest
     condition: succeeded()
     jobs:
@@ -201,22 +225,31 @@ stages:
           - checkout: self
 
           - task: AzureCLI@2
-            displayName: Build and Push to ACR
+            displayName: Build and Push Images to ACR
             inputs:
               azureSubscription: '$(azureServiceConnection)'
               scriptType: bash
               scriptLocation: inlineScript
               inlineScript: |
-                az acr login --name $(acrName)
+                az acr login --name "$(acrName)"
 
                 docker build \
-                  -f "$(dockerfilePath)" \
-                  -t "$(containerRegistry)/$(imageRepository):$(imageTag)" \
-                  -t "$(containerRegistry)/$(imageRepository):latest" \
+                  -f "$(webDockerfile)" \
+                  -t "$(containerRegistry)/$(webImageRepository):$(imageTag)" \
+                  -t "$(containerRegistry)/$(webImageRepository):latest" \
                   "$(dockerBuildContext)"
 
-                docker push "$(containerRegistry)/$(imageRepository):$(imageTag)"
-                docker push "$(containerRegistry)/$(imageRepository):latest"
+                docker push "$(containerRegistry)/$(webImageRepository):$(imageTag)"
+                docker push "$(containerRegistry)/$(webImageRepository):latest"
+
+                docker build \
+                  -f "$(weatherDockerfile)" \
+                  -t "$(containerRegistry)/$(weatherImageRepository):$(imageTag)" \
+                  -t "$(containerRegistry)/$(weatherImageRepository):latest" \
+                  "$(dockerBuildContext)"
+
+                docker push "$(containerRegistry)/$(weatherImageRepository):$(imageTag)"
+                docker push "$(containerRegistry)/$(weatherImageRepository):latest"
 
   - stage: DeployToAKS
     displayName: Deploy to AKS
@@ -224,7 +257,7 @@ stages:
     condition: succeeded()
     jobs:
       - job: Deploy
-        displayName: Deploy App to AKS
+        displayName: Deploy Apps to AKS
         pool:
           vmImage: $(vmImageName)
 
@@ -243,9 +276,14 @@ stages:
                   --name "$(aksClusterName)" \
                   --overwrite-existing
 
-                kubectl apply -f "$(appDirectory)/src/ContainerApp.TodoApi/k8s-deployment.yaml"
+                kubectl apply -f "$(webDeploymentManifest)"
+                kubectl apply -f "$(weatherDeploymentManifest)"
 
-                kubectl set image deployment/$(deploymentName) \
-                  $(containerName)="$(containerRegistry)/$(imageRepository):$(imageTag)"
+                kubectl set image deployment/$(webDeploymentName) \
+                  $(webContainerName)="$(containerRegistry)/$(webImageRepository):$(imageTag)"
 
-                kubectl rollout status deployment/$(deploymentName)
+                kubectl set image deployment/$(weatherDeploymentName) \
+                  $(weatherContainerName)="$(containerRegistry)/$(weatherImageRepository):$(imageTag)"
+
+                kubectl rollout status deployment/$(webDeploymentName)
+                kubectl rollout status deployment/$(weatherDeploymentName)
