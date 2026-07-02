@@ -160,29 +160,6 @@ stages:
         steps:
           - checkout: self
 
-          - bash: |
-              set -e
-              echo "Build.SourcesDirectory = $(Build.SourcesDirectory)"
-              echo "appDirectory = $(appDirectory)"
-              echo "solutionPath = $(solutionPath)"
-              echo "testProject = $(testProject)"
-              echo "webDockerfile = $(webDockerfile)"
-              echo "weatherDockerfile = $(weatherDockerfile)"
-              echo "webDeploymentManifest = $(webDeploymentManifest)"
-              echo "weatherDeploymentManifest = $(weatherDeploymentManifest)"
-
-              find "$(Build.SourcesDirectory)" -name "*.sln"
-              find "$(Build.SourcesDirectory)" -name "Dockerfile"
-              find "$(Build.SourcesDirectory)" -name "k8s-deployment.yaml"
-
-              test -f "$(solutionPath)" || { echo "ERROR: Solution file not found at $(solutionPath)"; exit 1; }
-              test -f "$(testProject)" || { echo "ERROR: Test project not found at $(testProject)"; exit 1; }
-              test -f "$(webDockerfile)" || { echo "ERROR: WebApp Dockerfile not found at $(webDockerfile)"; exit 1; }
-              test -f "$(weatherDockerfile)" || { echo "ERROR: WeatherApi Dockerfile not found at $(weatherDockerfile)"; exit 1; }
-              test -f "$(webDeploymentManifest)" || { echo "ERROR: WebApp manifest not found at $(webDeploymentManifest)"; exit 1; }
-              test -f "$(weatherDeploymentManifest)" || { echo "ERROR: WeatherApi manifest not found at $(weatherDeploymentManifest)"; exit 1; }
-            displayName: Verify Repository Layout
-
           - task: UseDotNet@2
             displayName: Install .NET 6 SDK
             inputs:
@@ -194,6 +171,19 @@ stages:
             inputs:
               packageType: sdk
               version: '8.x'
+
+          - bash: |
+              set -e
+              echo "solutionPath=$(solutionPath)"
+              echo "testProject=$(testProject)"
+              echo "webDockerfile=$(webDockerfile)"
+              echo "weatherDockerfile=$(weatherDockerfile)"
+
+              test -f "$(solutionPath)"
+              test -f "$(testProject)"
+              test -f "$(webDockerfile)"
+              test -f "$(weatherDockerfile)"
+            displayName: Verify Repository Layout
 
           - script: |
               dotnet restore "$(solutionPath)"
@@ -222,18 +212,6 @@ stages:
           - checkout: self
 
           - task: AzureCLI@2
-            displayName: Verify ACR
-            inputs:
-              azureSubscription: '$(azureServiceConnection)'
-              scriptType: bash
-              scriptLocation: inlineScript
-              inlineScript: |
-                set -e
-                az acr show --name "$(acrName)" --output table
-                echo "Login Server:"
-                az acr show --name "$(acrName)" --query loginServer -o tsv
-
-          - task: AzureCLI@2
             displayName: Build and Push Images to ACR
             inputs:
               azureSubscription: '$(azureServiceConnection)'
@@ -242,27 +220,24 @@ stages:
               inlineScript: |
                 set -e
 
+                az acr show --name "$(acrName)" --query loginServer -o tsv
                 az acr login --name "$(acrName)"
 
-                echo "Building WebApp image..."
                 docker build \
                   -f "$(webDockerfile)" \
                   -t "$(containerRegistry)/$(webImageRepository):$(imageTag)" \
                   -t "$(containerRegistry)/$(webImageRepository):latest" \
                   "$(dockerBuildContext)"
 
-                echo "Pushing WebApp image..."
                 docker push "$(containerRegistry)/$(webImageRepository):$(imageTag)"
                 docker push "$(containerRegistry)/$(webImageRepository):latest"
 
-                echo "Building WeatherApi image..."
                 docker build \
                   -f "$(weatherDockerfile)" \
                   -t "$(containerRegistry)/$(weatherImageRepository):$(imageTag)" \
                   -t "$(containerRegistry)/$(weatherImageRepository):latest" \
                   "$(dockerBuildContext)"
 
-                echo "Pushing WeatherApi image..."
                 docker push "$(containerRegistry)/$(weatherImageRepository):$(imageTag)"
                 docker push "$(containerRegistry)/$(weatherImageRepository):latest"
 
@@ -293,20 +268,25 @@ stages:
                   --name "$(aksClusterName)" \
                   --overwrite-existing
 
-                kubectl cluster-info
                 kubectl get nodes
 
-                kubectl apply -f "$(webDeploymentManifest)"
-                kubectl apply -f "$(weatherDeploymentManifest)"
+                WEB_IMAGE="$(containerRegistry)/$(webImageRepository):$(imageTag)"
+                WEATHER_IMAGE="$(containerRegistry)/$(weatherImageRepository):$(imageTag)"
+
+                cp "$(webDeploymentManifest)" web-deployment.yaml
+                cp "$(weatherDeploymentManifest)" weather-deployment.yaml
+
+                sed -i "s|_ImageUrlApp_|$WEB_IMAGE|g" web-deployment.yaml
+                sed -i "s|_ImageUrlApp_|$WEATHER_IMAGE|g" weather-deployment.yaml
+
+                kubectl apply -f web-deployment.yaml
+                kubectl apply -f weather-deployment.yaml
 
                 kubectl set image deployment/$(webDeploymentName) \
-                  "$(webContainerName)=$(containerRegistry)/$(webImageRepository):$(imageTag)"
+                  "$(webContainerName)=$WEB_IMAGE"
 
                 kubectl set image deployment/$(weatherDeploymentName) \
-                  "$(weatherContainerName)=$(containerRegistry)/$(weatherImageRepository):$(imageTag)"
+                  "$(weatherContainerName)=$WEATHER_IMAGE"
 
-                kubectl rollout status deployment/$(webDeploymentName) --timeout=180s
-                kubectl rollout status deployment/$(weatherDeploymentName) --timeout=180s
-
-                kubectl get pods -o wide
-                kubectl get svc
+                kubectl rollout status deployment/$(webDeploymentName)
+                kubectl rollout status deployment/$(weatherDeploymentName)

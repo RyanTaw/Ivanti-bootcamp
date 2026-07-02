@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
         - name: containerapp-webapp
-          image: "_ImageUrlApp_"
+          image: nginx:latest
           env:
             - name: ApiAddress
               value: "http://containerapp-todoapi-svc.default.svc.cluster.local"
@@ -41,11 +41,11 @@ spec:
               containerPort: 80
           resources:
             requests:
-              cpu: "250m"
-              memory: "64Mi"
-            limits:
-              cpu: "500m"
+              cpu: "100m"
               memory: "128Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
 ---
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
