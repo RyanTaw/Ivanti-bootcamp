@@ -11,6 +11,42 @@ pr:
 resources:
   - repo: self
 
+variables:
+  - group: bootcamp-dev
+
+  - name: azureServiceConnection
+    value: 'avanti-bootcamp'
+
+  - name: terraformDirectory
+    value: '$(Build.SourcesDirectory)/terraform'
+
+  - name: acrName
+    value: 'avantibootcampdevacr'
+
+  - name: containerRegistry
+    value: 'avantibootcampdevacr.azurecr.io'
+
+  - name: imageRepository
+    value: 'aivantibootcampimg'
+
+  - name: dockerfilePath
+    value: '$(Build.SourcesDirectory)/Dockerfile'
+
+  - name: tag
+    value: '$(Build.BuildId)'
+
+  - name: resourceGroupName
+    value: 'avanti-bootcamp-dev-rg'
+
+  - name: aksClusterName
+    value: 'avanti-bootcamp-dev-aks'
+
+  - name: imagePullSecret
+    value: 'avanti-acr-auth'
+
+  - name: vmImageName
+    value: 'ubuntu-latest'
+
 parameters:
   - name: environment
     displayName: Environment
@@ -24,10 +60,11 @@ parameters:
     type: boolean
     default: false
 
-variables:
-  azureServiceConnection: 'avanti-bootcamp'
-  terraformDirectory: '$(Build.SourcesDirectory)/terraform'
-  vmImageName: 'ubuntu-latest'
+env:
+  TF_VAR_tenant_id: $(TF_VAR_tenant_id)
+  TF_VAR_sql_admin_username: $(sqlAdminUsername)
+  TF_VAR_sql_admin_password: $(sqlAdminPassword)
+
 
 stages:
   - stage: Terraform
