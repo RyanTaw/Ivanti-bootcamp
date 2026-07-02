@@ -24,31 +24,14 @@ parameters:
     type: boolean
     default: false
 
-  - name: destroyTerraform
-    displayName: Run terraform DESTROY!!?
-    type: boolean
-    default: false
-
 variables:
   azureServiceConnection: 'avanti-bootcamp'
-
   terraformDirectory: '$(Build.SourcesDirectory)/terraform'
-
-  acrName: 'avantibootcampdevacr'
-  containerRegistry: 'avantibootcampdevacr.azurecr.io'
-  imageRepository: 'aivantibootcampimg'
-  dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
-  tag: '$(Build.BuildId)'
-
-  resourceGroupName: 'avanti-bootcamp-dev-rg'
-  aksClusterName: 'avanti-bootcamp-dev-aks'
-
-  imagePullSecret: 'avanti-acr-auth'
   vmImageName: 'ubuntu-latest'
 
 stages:
   - stage: Terraform
-    displayName: Terraform Plan Apply Destroy
+    displayName: Terraform Plan & Apply
     jobs:
       - job: TerraformJob
         displayName: Terraform Job
@@ -57,33 +40,45 @@ stages:
 
         steps:
           - checkout: self
+
           - task: TerraformInstaller@1
+            displayName: Install Terraform
             inputs:
               terraformVersion: 'latest'
 
           - task: AzureCLI@2
-            displayName: Run Terraform Script
+            displayName: Terraform Plan
             inputs:
               azureSubscription: '$(azureServiceConnection)'
               scriptType: ps
               scriptLocation: inlineScript
               workingDirectory: '$(terraformDirectory)'
               inlineScript: |
-                Write-Host "Environment: ${{ parameters.environment }}"
+                Write-Host "Running Terraform PLAN for ${{ parameters.environment }}"
+                .\prepare_template1.ps1 ${{ parameters.environment }}
+            env:
+              TF_VAR_sql_admin_username: $(sqlAdminUsername)
+              TF_VAR_sql_admin_password: $(sqlAdminPassword)
 
-                if ("${{ parameters.applyTerraform }}" -eq "True" -and "${{ parameters.destroyTerraform }}" -eq "True") {
-                  throw "You cannot apply and destroy at the same time."
-                }
+          - task: PublishBuildArtifacts@1
+            displayName: Publish Terraform Plan Files
+            condition: always()
+            inputs:
+              PathtoPublish: '$(Build.SourcesDirectory)/terraform/modules/template1'
+              ArtifactName: 'terraform-plan-${{ parameters.environment }}'
+              publishLocation: Container
 
-                if ("${{ parameters.destroyTerraform }}" -eq "True") {
-                  .\prepare_template1.ps1 ${{ parameters.environment }} -Destroy
-                }
-                elseif ("${{ parameters.applyTerraform }}" -eq "True") {
-                  .\prepare_template1.ps1 ${{ parameters.environment }} -Apply
-                }
-                else {
-                  .\prepare_template1.ps1 ${{ parameters.environment }}
-                }
+          - task: AzureCLI@2
+            displayName: Terraform Apply
+            condition: and(succeeded(), eq('${{ parameters.applyTerraform }}', 'True'))
+            inputs:
+              azureSubscription: '$(azureServiceConnection)'
+              scriptType: ps
+              scriptLocation: inlineScript
+              workingDirectory: '$(terraformDirectory)'
+              inlineScript: |
+                Write-Host "Running Terraform APPLY for ${{ parameters.environment }}"
+                .\prepare_template1.ps1 ${{ parameters.environment }} -Apply
             env:
               TF_VAR_sql_admin_username: $(sqlAdminUsername)
               TF_VAR_sql_admin_password: $(sqlAdminPassword)
