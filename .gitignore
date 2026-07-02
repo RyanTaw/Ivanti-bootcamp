@@ -30,3 +30,4 @@ terraform.tfvars.json
 .vs/
 bin/
 obj/
+terraform/modules/template1/terraform-plan.txt

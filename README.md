@@ -26,3 +26,12 @@ azure-devops workflow:
 4. Publish terraform plan - wait for all resources to complete creation
 5. Build dotnet app docker image
 6. Deploy image to AKS
+
+Setup loki to view cluster through a UI
+
+azureServiceConnection: 'YOUR-AZURE-SERVICE-CONNECTION-NAME'
+acrName: 'avantibootcampdevacr'
+containerRegistry: 'avantibootcampdevacr.azurecr.io'
+resourceGroupName: 'avanti-bootcamp-dev-rg'
+aksClusterName: 'avanti-bootcamp-dev-aks'
+imagePullSecret: 'avanti-acr-auth'

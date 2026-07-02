@@ -24,23 +24,20 @@ resource "azurerm_kubernetes_cluster" "aks" {
   oidc_issuer_enabled       = true
   workload_identity_enabled = true
 
-
   default_node_pool {
-    name                 = "bootcamp"
-    vm_size              = "Standard_DS2_v2"
-    type                 = "VirtualMachineScaleSets"
-    vnet_subnet_id       = azurerm_subnet.aks_subnet.id
-    max_pods             = 5
-    auto_scaling_enabled = true
-    min_count            = 1
-    max_count            = 2
+    name           = "bootcamp"
+    vm_size        = "Standard_DC2as_v5"
+    type           = "VirtualMachineScaleSets"
+    vnet_subnet_id = azurerm_subnet.aks_subnet.id
+    node_count     = 1
+    max_pods       = 31
 
     node_labels = {
       app = "dotnet"
     }
 
     upgrade_settings {
-      max_surge = "2"
+      max_surge = "1"
     }
 
     tags = local.tags
