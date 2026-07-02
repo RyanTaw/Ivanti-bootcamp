@@ -8,6 +8,7 @@ variable "location" {
 
 variable "tenant_id" {
   type = string
+  default = "0de2b198-522f-47c8-a44b-d3a98712404f"
 }
 
 variable "sql_admin_username" {
