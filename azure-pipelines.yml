@@ -81,11 +81,11 @@ variables:
   - name: webDeploymentName
     value: 'containerapp-webapp-deploy'
 
-  - name: weatherDeploymentName
-    value: 'containerapp-weatherapi-deploy'
+  - name: webContainerName
+    value: 'containerapp-webapp'
 
   - name: weatherDeploymentName
-    value: 'containerapp-weatherapi'
+    value: 'containerapp-weatherapi-deploy'
 
   - name: weatherContainerName
     value: 'containerapp-weatherapi'
@@ -161,35 +161,26 @@ stages:
           - checkout: self
 
           - bash: |
+              set -e
               echo "Build.SourcesDirectory = $(Build.SourcesDirectory)"
               echo "appDirectory = $(appDirectory)"
               echo "solutionPath = $(solutionPath)"
               echo "testProject = $(testProject)"
               echo "webDockerfile = $(webDockerfile)"
               echo "weatherDockerfile = $(weatherDockerfile)"
+              echo "webDeploymentManifest = $(webDeploymentManifest)"
+              echo "weatherDeploymentManifest = $(weatherDeploymentManifest)"
 
               find "$(Build.SourcesDirectory)" -name "*.sln"
               find "$(Build.SourcesDirectory)" -name "Dockerfile"
+              find "$(Build.SourcesDirectory)" -name "k8s-deployment.yaml"
 
-              if [ ! -f "$(solutionPath)" ]; then
-                echo "ERROR: Solution file not found at $(solutionPath)"
-                exit 1
-              fi
-
-              if [ ! -f "$(testProject)" ]; then
-                echo "ERROR: Test project not found at $(testProject)"
-                exit 1
-              fi
-
-              if [ ! -f "$(webDockerfile)" ]; then
-                echo "ERROR: WebApp Dockerfile not found at $(webDockerfile)"
-                exit 1
-              fi
-
-              if [ ! -f "$(weatherDockerfile)" ]; then
-                echo "ERROR: WeatherApi Dockerfile not found at $(weatherDockerfile)"
-                exit 1
-              fi
+              test -f "$(solutionPath)" || { echo "ERROR: Solution file not found at $(solutionPath)"; exit 1; }
+              test -f "$(testProject)" || { echo "ERROR: Test project not found at $(testProject)"; exit 1; }
+              test -f "$(webDockerfile)" || { echo "ERROR: WebApp Dockerfile not found at $(webDockerfile)"; exit 1; }
+              test -f "$(weatherDockerfile)" || { echo "ERROR: WeatherApi Dockerfile not found at $(weatherDockerfile)"; exit 1; }
+              test -f "$(webDeploymentManifest)" || { echo "ERROR: WebApp manifest not found at $(webDeploymentManifest)"; exit 1; }
+              test -f "$(weatherDeploymentManifest)" || { echo "ERROR: WeatherApi manifest not found at $(weatherDeploymentManifest)"; exit 1; }
             displayName: Verify Repository Layout
 
           - task: UseDotNet@2
@@ -237,9 +228,10 @@ stages:
               scriptType: bash
               scriptLocation: inlineScript
               inlineScript: |
-                az acr show --name $(acrName) --output table
+                set -e
+                az acr show --name "$(acrName)" --output table
                 echo "Login Server:"
-                az acr show --name $(acrName) --query loginServer -o tsv
+                az acr show --name "$(acrName)" --query loginServer -o tsv
 
           - task: AzureCLI@2
             displayName: Build and Push Images to ACR
@@ -248,23 +240,29 @@ stages:
               scriptType: bash
               scriptLocation: inlineScript
               inlineScript: |
+                set -e
+
                 az acr login --name "$(acrName)"
 
+                echo "Building WebApp image..."
                 docker build \
                   -f "$(webDockerfile)" \
                   -t "$(containerRegistry)/$(webImageRepository):$(imageTag)" \
                   -t "$(containerRegistry)/$(webImageRepository):latest" \
                   "$(dockerBuildContext)"
 
+                echo "Pushing WebApp image..."
                 docker push "$(containerRegistry)/$(webImageRepository):$(imageTag)"
                 docker push "$(containerRegistry)/$(webImageRepository):latest"
 
+                echo "Building WeatherApi image..."
                 docker build \
                   -f "$(weatherDockerfile)" \
                   -t "$(containerRegistry)/$(weatherImageRepository):$(imageTag)" \
                   -t "$(containerRegistry)/$(weatherImageRepository):latest" \
                   "$(dockerBuildContext)"
 
+                echo "Pushing WeatherApi image..."
                 docker push "$(containerRegistry)/$(weatherImageRepository):$(imageTag)"
                 docker push "$(containerRegistry)/$(weatherImageRepository):latest"
 
@@ -295,6 +293,9 @@ stages:
                   --name "$(aksClusterName)" \
                   --overwrite-existing
 
+                kubectl cluster-info
+                kubectl get nodes
+
                 kubectl apply -f "$(webDeploymentManifest)"
                 kubectl apply -f "$(weatherDeploymentManifest)"
 
@@ -304,5 +305,8 @@ stages:
                 kubectl set image deployment/$(weatherDeploymentName) \
                   "$(weatherContainerName)=$(containerRegistry)/$(weatherImageRepository):$(imageTag)"
 
-                kubectl rollout status deployment/$(webDeploymentName)
-                kubectl rollout status deployment/$(weatherDeploymentName)
+                kubectl rollout status deployment/$(webDeploymentName) --timeout=180s
+                kubectl rollout status deployment/$(weatherDeploymentName) --timeout=180s
+
+                kubectl get pods -o wide
+                kubectl get svc
