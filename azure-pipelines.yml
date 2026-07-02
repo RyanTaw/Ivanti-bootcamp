@@ -11,18 +11,18 @@ pr:
 resources:
   - repo: self
 
-# parameters:
-#   - name: environment
-#     displayName: Environment
-#     type: string
-#     default: DEV
-#     values:
-#       - DEV
-#
-#   - name: applyTerraform
-#     displayName: Apply terraform?
-#     type: boolean
-#     default: false
+parameters:
+  - name: environment
+    displayName: Environment
+    type: string
+    default: DEV
+    values:
+      - DEV
+
+  - name: destroyTerraform
+    displayName: Destroy Infrastructure?
+    type: boolean
+    default: false
 
 variables:
   - group: bootcamp-dev
@@ -78,6 +78,7 @@ variables:
 stages:
   # - stage: Terraform
   #   displayName: Terraform Plan Apply
+  #   condition: eq('${{ parameters.destroyTerraform }}', 'False')
   #   jobs:
   #     - job: TerraformJob
   #       displayName: Terraform Job
@@ -90,10 +91,40 @@ stages:
   #         - task: PublishBuildArtifacts@1
   #         - task: AzureCLI@2
 
+  # - stage: TerraformDestroy
+  #   displayName: Terraform Destroy
+  #   condition: eq('${{ parameters.destroyTerraform }}', 'True')
+  #   jobs:
+  #     - job: Destroy
+  #       displayName: Destroy Infrastructure
+  #       pool:
+  #         vmImage: windows-latest
+
+  #       steps:
+  #         - checkout: self
+
+  #         - task: TerraformInstaller@1
+  #           displayName: Install Terraform
+  #           inputs:
+  #             terraformVersion: 'latest'
+
+  #         - task: AzureCLI@2
+  #           displayName: Terraform Destroy
+  #           inputs:
+  #             azureSubscription: '$(azureServiceConnection)'
+  #             scriptType: ps
+  #             scriptLocation: inlineScript
+  #             workingDirectory: '$(Build.SourcesDirectory)/terraform'
+  #             inlineScript: |
+  #               .\prepare_template1.ps1 ${{ parameters.environment }} -Destroy
+  #           env:
+  #             TF_VAR_tenant_id: $(tenantId)
+  #             TF_VAR_sql_admin_username: $(sqlAdminUsername)
+  #             TF_VAR_sql_admin_password: $(sqlAdminPassword)
+
   # - stage: DotNetBuildTest
   #   displayName: Build and Test .NET App
-  #   dependsOn: Terraform
-  #   condition: succeeded()
+  #   condition: and(succeeded(), eq('${{ parameters.destroyTerraform }}', 'False'))
   #   jobs:
   #     - job: BuildTest
   #       displayName: Build and Test
@@ -113,8 +144,7 @@ stages:
 
   # - stage: DockerBuildPush
   #   displayName: Build and Push Docker Images
-  #   dependsOn: DotNetBuildTest
-  #   condition: succeeded()
+  #   condition: and(succeeded(), eq('${{ parameters.destroyTerraform }}', 'False'))
   #   jobs:
   #     - job: DockerBuild
   #       displayName: Docker Build Push
@@ -126,6 +156,7 @@ stages:
 
   - stage: DeployToAKS
     displayName: Deploy to AKS
+    condition: and(succeeded(), eq('${{ parameters.destroyTerraform }}', 'False'))
     jobs:
       - job: Deploy
         displayName: Deploy Apps to AKS
@@ -164,8 +195,6 @@ stages:
                   --resource-group "$(resourceGroupName)" \
                   --name "$(aksClusterName)" \
                   --overwrite-existing
-
-                az aks update --resource-group avanti-avanti-bootcamp-rg --name avanti-avanti-bootcamp-aks --attach-acr avantiavantibootcampacr
 
                 kubectl get nodes
 
