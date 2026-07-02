@@ -78,11 +78,11 @@ variables:
   - name: weatherDeploymentManifest
     value: '$(appDirectory)/src/ContainerApp.WeatherApi/k8s-deployment.yaml'
 
-  - name: webDeploymentName
-    value: 'containerapp-webapp'
+    - name: webDeploymentName
+      value: 'containerapp-webapp-deploy'
 
-  - name: webContainerName
-    value: 'containerapp-webapp'
+    - name: weatherDeploymentName
+      value: 'containerapp-weatherapi-deploy'
 
   - name: weatherDeploymentName
     value: 'containerapp-weatherapi'
