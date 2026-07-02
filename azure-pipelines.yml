@@ -139,6 +139,35 @@ stages:
         steps:
           - checkout: self
 
+          - bash: |
+              echo "Build.SourcesDirectory = $(Build.SourcesDirectory)"
+              echo "appDirectory = $(appDirectory)"
+              echo "solutionPath = $(solutionPath)"
+              echo "dockerfilePath = $(dockerfilePath)"
+              echo "dockerBuildContext = $(dockerBuildContext)"
+              echo ""
+              echo "Current directory:"
+              pwd
+              echo ""
+              echo "Root contents:"
+              ls -la "$(Build.SourcesDirectory)"
+              echo ""
+              echo "Searching for solution files:"
+              find "$(Build.SourcesDirectory)" -name "*.sln"
+              echo ""
+              echo "Searching for Dockerfiles:"
+              find "$(Build.SourcesDirectory)" -name "Dockerfile"
+              echo ""
+              if [ ! -f "$(solutionPath)" ]; then
+                echo "ERROR: Solution file not found at $(solutionPath)"
+                exit 1
+              fi
+              if [ ! -f "$(dockerfilePath)" ]; then
+                echo "ERROR: Dockerfile not found at $(dockerfilePath)"
+                exit 1
+              fi
+            displayName: Verify Repository Layout
+
           - task: UseDotNet@2
             displayName: Install .NET SDK
             inputs:
