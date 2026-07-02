@@ -67,10 +67,10 @@ variables:
     value: '$(Build.BuildId)'
 
   - name: resourceGroupName
-    value: 'avanti-bootcamp-dev-rg'
+    value: 'avanti-avanti-bootcamp-rg'
 
   - name: aksClusterName
-    value: 'avanti-bootcamp-dev-aks'
+    value: 'avanti-avanti-bootcamp-aks'
 
   - name: webDeploymentManifest
     value: '$(appDirectory)/src/ContainerApp.WebApp/k8s-deployment.yaml'
