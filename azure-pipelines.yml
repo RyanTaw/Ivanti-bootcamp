@@ -253,6 +253,20 @@ stages:
 
         steps:
           - checkout: self
+          
+          - task: AzureCLI@2
+            displayName: Create Namespace
+            inputs:
+              azureSubscription: '$(azureServiceConnection)'
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                az aks get-credentials \
+                  --resource-group "$(resourceGroupName)" \
+                  --name "$(aksClusterName)" \
+                  --overwrite-existing
+
+                kubectl create namespace bootcamp --dry-run=client -o yaml | kubectl apply -f -
 
           - task: AzureCLI@2
             displayName: Deploy to Kubernetes

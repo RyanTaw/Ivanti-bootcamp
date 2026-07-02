@@ -2,6 +2,7 @@
 apiVersion: v1
 metadata:
   name: containerapp-webapp-svc
+  namespace: bootcamp
 spec:
   type: LoadBalancer
   selector:
@@ -16,6 +17,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: containerapp-webapp-deploy
+  namespace: bootcamp
 spec:
   replicas: 1
   selector:
@@ -33,9 +35,9 @@ spec:
           image: nginx:latest
           env:
             - name: ApiAddress
-              value: "http://containerapp-todoapi-svc.default.svc.cluster.local"
+              value: "http://containerapp-todoapi-svc.bootcamp.svc.cluster.local"
             - name: WeatherApi
-              value: "http://containerapp-weatherapi-svc.default.svc.cluster.local"
+              value: "http://containerapp-weatherapi-svc.bootcamp.svc.cluster.local"
           ports:
             - name: http
               containerPort: 80
@@ -51,7 +53,7 @@ apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
   name: containerapp-webapp-scaler
-  namespace: default
+  namespace: bootcamp
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
