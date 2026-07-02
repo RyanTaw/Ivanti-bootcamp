@@ -124,7 +124,7 @@ stages:
   #         - checkout: self
   #         - task: AzureCLI@2
 
-  - stage: Deploy-To-AKS
+  - stage: DeployToAKS
     displayName: Deploy to AKS
     jobs:
       - job: Deploy
@@ -166,7 +166,7 @@ stages:
                   --overwrite-existing
 
                 az aks update --resource-group avanti-avanti-bootcamp-rg --name avanti-avanti-bootcamp-aks --attach-acr avantiavantibootcampacr
-                
+
                 kubectl get nodes
 
                 WEB_IMAGE="$(containerRegistry)/$(webImageRepository):$(imageTag)"
