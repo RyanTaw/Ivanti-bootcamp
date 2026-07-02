@@ -120,25 +120,12 @@ stages:
               TF_VAR_sql_admin_username: $(sqlAdminUsername)
               TF_VAR_sql_admin_password: $(sqlAdminPassword)
 
-          - task: PublishBuildArtifacts@1
-            displayName: Publish Terraform Plan Files
-            condition: always()
-            inputs:
-              PathtoPublish: '$(Build.SourcesDirectory)/terraform/modules/template1'
-              ArtifactName: 'terraform-plan-${{ parameters.environment }}'
-              publishLocation: Container
-
   - stage: TerraformApply
     displayName: Terraform Apply
     dependsOn: TerraformPlan
-    condition: and(
-      succeeded(),
-      eq('${{ parameters.applyTerraform }}', 'True'),
-      eq('${{ parameters.destroyTerraform }}', 'False')
-    )
+    condition: and(succeeded(), eq('${{ parameters.applyTerraform }}', 'True'), eq('${{ parameters.destroyTerraform }}', 'False'))
     jobs:
       - job: Apply
-        displayName: Terraform Apply
         pool:
           vmImage: windows-latest
 
@@ -146,7 +133,6 @@ stages:
           - checkout: self
 
           - task: TerraformInstaller@1
-            displayName: Install Terraform
             inputs:
               terraformVersion: 'latest'
 
@@ -167,14 +153,9 @@ stages:
   - stage: TerraformDestroy
     displayName: Terraform Destroy
     dependsOn: TerraformPlan
-    condition: and(
-      succeeded(),
-      eq('${{ parameters.destroyTerraform }}', 'True'),
-      eq('${{ parameters.applyTerraform }}', 'False')
-    )
+    condition: and(succeeded(), eq('${{ parameters.destroyTerraform }}', 'True'), eq('${{ parameters.applyTerraform }}', 'False'))
     jobs:
       - job: Destroy
-        displayName: Terraform Destroy
         pool:
           vmImage: windows-latest
 
@@ -182,7 +163,6 @@ stages:
           - checkout: self
 
           - task: TerraformInstaller@1
-            displayName: Install Terraform
             inputs:
               terraformVersion: 'latest'
 
@@ -203,11 +183,7 @@ stages:
   - stage: DeployToAKS
     displayName: Deploy to AKS
     dependsOn: TerraformApply
-    condition: and(
-      succeeded(),
-      eq('${{ parameters.applyTerraform }}', 'True'),
-      eq('${{ parameters.destroyTerraform }}', 'False')
-    )
+    condition: and(succeeded(), eq('${{ parameters.applyTerraform }}', 'True'), eq('${{ parameters.destroyTerraform }}', 'False'))
     jobs:
       - job: Deploy
         displayName: Deploy Apps to AKS
@@ -216,22 +192,6 @@ stages:
 
         steps:
           - checkout: self
-
-          - task: AzureCLI@2
-            displayName: Create Namespace
-            inputs:
-              azureSubscription: '$(azureServiceConnection)'
-              scriptType: bash
-              scriptLocation: inlineScript
-              inlineScript: |
-                set -e
-
-                az aks get-credentials \
-                  --resource-group "$(resourceGroupName)" \
-                  --name "$(aksClusterName)" \
-                  --overwrite-existing
-
-                kubectl create namespace "$(namespace)" --dry-run=client -o yaml | kubectl apply -f -
 
           - task: AzureCLI@2
             displayName: Deploy to Kubernetes
@@ -247,7 +207,7 @@ stages:
                   --name "$(aksClusterName)" \
                   --overwrite-existing
 
-                kubectl get nodes
+                kubectl create namespace "$(namespace)" --dry-run=client -o yaml | kubectl apply -f -
 
                 WEB_IMAGE="$(containerRegistry)/$(webImageRepository):$(imageTag)"
                 WEATHER_IMAGE="$(containerRegistry)/$(weatherImageRepository):$(imageTag)"
@@ -261,13 +221,8 @@ stages:
                 kubectl apply -f web-deployment.yaml -n "$(namespace)"
                 kubectl apply -f weather-deployment.yaml -n "$(namespace)"
 
-                kubectl set image deployment/$(webDeploymentName) \
-                  "$(webContainerName)=$WEB_IMAGE" \
-                  -n "$(namespace)"
-
-                kubectl set image deployment/$(weatherDeploymentName) \
-                  "$(weatherContainerName)=$WEATHER_IMAGE" \
-                  -n "$(namespace)"
+                kubectl set image deployment/$(webDeploymentName) "$(webContainerName)=$WEB_IMAGE" -n "$(namespace)"
+                kubectl set image deployment/$(weatherDeploymentName) "$(weatherContainerName)=$WEATHER_IMAGE" -n "$(namespace)"
 
                 kubectl rollout status deployment/$(webDeploymentName) -n "$(namespace)"
                 kubectl rollout status deployment/$(weatherDeploymentName) -n "$(namespace)"
