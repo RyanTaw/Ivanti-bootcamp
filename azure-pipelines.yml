@@ -30,7 +30,7 @@ parameters:
     default: false
 
 variables:
-  azureServiceConnection: 'develop'
+  azureServiceConnection: 'f4fc9f16-1394-4eb5-8bfc-9d4f7a26c06b'
 
   terraformDirectory: '$(Build.SourcesDirectory)/terraform'
 
@@ -57,11 +57,9 @@ stages:
 
         steps:
           - checkout: self
-
           - task: TerraformInstaller@1
-            displayName: Install Terraform
             inputs:
-              terraformVersion: latest
+              terraformVersion: 'latest'
 
           - task: AzureCLI@2
             displayName: Run Terraform Script
