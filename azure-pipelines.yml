@@ -76,83 +76,137 @@ variables:
     value: 'ubuntu-latest'
 
 stages:
-  # - stage: Terraform
-  #   displayName: Terraform Plan Apply
-  #   condition: eq('${{ parameters.destroyTerraform }}', 'False')
-  #   jobs:
-  #     - job: TerraformJob
-  #       displayName: Terraform Job
-  #       pool:
-  #         vmImage: windows-latest
-  #       steps:
-  #         - checkout: self
-  #         - task: TerraformInstaller@1
-  #         - task: AzureCLI@2
-  #         - task: PublishBuildArtifacts@1
-  #         - task: AzureCLI@2
+  - stage: TerraformPlan
+    displayName: Terraform Plan
+    jobs:
+      - job: Plan
+        pool:
+          vmImage: windows-latest
+        steps:
+          - checkout: self
 
-  # - stage: TerraformDestroy
-  #   displayName: Terraform Destroy
-  #   condition: eq('${{ parameters.destroyTerraform }}', 'True')
-  #   jobs:
-  #     - job: Destroy
-  #       displayName: Destroy Infrastructure
-  #       pool:
-  #         vmImage: windows-latest
+          - task: TerraformInstaller@1
+            inputs:
+              terraformVersion: latest
 
-  #       steps:
-  #         - checkout: self
+          - task: AzureCLI@2
+            displayName: Terraform Plan
+            inputs:
+              azureSubscription: '$(azureServiceConnection)'
+              scriptType: ps
+              scriptLocation: inlineScript
+              workingDirectory: '$(Build.SourcesDirectory)/terraform'
+              inlineScript: |
+                .\prepare_template1.ps1 ${{ parameters.environment }}
+            env:
+              TF_VAR_tenant_id: $(tenantId)
+              TF_VAR_sql_admin_username: $(sqlAdminUsername)
+              TF_VAR_sql_admin_password: $(sqlAdminPassword)
 
-  #         - task: TerraformInstaller@1
-  #           displayName: Install Terraform
-  #           inputs:
-  #             terraformVersion: 'latest'
+  - stage: ManualApproval
+    displayName: Approve Terraform Action
+    dependsOn: TerraformPlan
+    condition: and(succeeded(), ne('${{ parameters.terraformAction }}', 'plan'))
+    jobs:
+      - job: WaitForApproval
+        displayName: Confirm Apply or Destroy
+        pool: server
+        steps:
+          - task: ManualValidation@0
+            timeoutInMinutes: 60
+            inputs:
+              instructions: 'Terraform plan completed. Approve to continue with ${{ parameters.terraformAction }}.'
+              onTimeout: reject
 
-  #         - task: AzureCLI@2
-  #           displayName: Terraform Destroy
-  #           inputs:
-  #             azureSubscription: '$(azureServiceConnection)'
-  #             scriptType: ps
-  #             scriptLocation: inlineScript
-  #             workingDirectory: '$(Build.SourcesDirectory)/terraform'
-  #             inlineScript: |
-  #               .\prepare_template1.ps1 ${{ parameters.environment }} -Destroy
-  #           env:
-  #             TF_VAR_tenant_id: $(tenantId)
-  #             TF_VAR_sql_admin_username: $(sqlAdminUsername)
-  #             TF_VAR_sql_admin_password: $(sqlAdminPassword)
+  - stage: TerraformApply
+    displayName: Terraform Apply
+    dependsOn: ManualApproval
+    condition: and(succeeded(), eq('${{ parameters.terraformAction }}', 'apply'))
+    jobs:
+      - job: Apply
+        pool:
+          vmImage: windows-latest
+        steps:
+          - checkout: self
 
-  # - stage: DotNetBuildTest
-  #   displayName: Build and Test .NET App
-  #   condition: and(succeeded(), eq('${{ parameters.destroyTerraform }}', 'False'))
-  #   jobs:
-  #     - job: BuildTest
-  #       displayName: Build and Test
-  #       pool:
-  #         vmImage: $(vmImageName)
-  #       steps:
-  #         - checkout: self
-  #         - task: UseDotNet@2
-  #         - task: UseDotNet@2
-  #         - bash: |
-  #             echo "Verify Repository Layout"
-  #         - script: |
-  #             dotnet restore
-  #             dotnet build
-  #             dotnet test
-  #         - task: PublishTestResults@2
+          - task: TerraformInstaller@1
+            inputs:
+              terraformVersion: latest
 
-  # - stage: DockerBuildPush
-  #   displayName: Build and Push Docker Images
-  #   condition: and(succeeded(), eq('${{ parameters.destroyTerraform }}', 'False'))
-  #   jobs:
-  #     - job: DockerBuild
-  #       displayName: Docker Build Push
-  #       pool:
-  #         vmImage: $(vmImageName)
-  #       steps:
-  #         - checkout: self
-  #         - task: AzureCLI@2
+          - task: AzureCLI@2
+            displayName: Terraform Apply
+            inputs:
+              azureSubscription: '$(azureServiceConnection)'
+              scriptType: ps
+              scriptLocation: inlineScript
+              workingDirectory: '$(Build.SourcesDirectory)/terraform'
+              inlineScript: |
+                .\prepare_template1.ps1 ${{ parameters.environment }} -Apply
+            env:
+              TF_VAR_tenant_id: $(tenantId)
+              TF_VAR_sql_admin_username: $(sqlAdminUsername)
+              TF_VAR_sql_admin_password: $(sqlAdminPassword)
+
+  - stage: TerraformDestroy
+    displayName: Terraform Destroy
+    dependsOn: ManualApproval
+    condition: and(succeeded(), eq('${{ parameters.terraformAction }}', 'destroy'))
+    jobs:
+      - job: Destroy
+        pool:
+          vmImage: windows-latest
+        steps:
+          - checkout: self
+
+          - task: TerraformInstaller@1
+            inputs:
+              terraformVersion: latest
+
+          - task: AzureCLI@2
+            displayName: Terraform Destroy
+            inputs:
+              azureSubscription: '$(azureServiceConnection)'
+              scriptType: ps
+              scriptLocation: inlineScript
+              workingDirectory: '$(Build.SourcesDirectory)/terraform'
+              inlineScript: |
+                .\prepare_template1.ps1 ${{ parameters.environment }} -Destroy
+            env:
+              TF_VAR_tenant_id: $(tenantId)
+              TF_VAR_sql_admin_username: $(sqlAdminUsername)
+              TF_VAR_sql_admin_password: $(sqlAdminPassword)
+
+  - stage: DotNetBuildTest
+    displayName: Build and Test .NET App
+    condition: and(succeeded(), eq('${{ parameters.destroyTerraform }}', 'False'))
+    jobs:
+      - job: BuildTest
+        displayName: Build and Test
+        pool:
+          vmImage: $(vmImageName)
+        steps:
+          - checkout: self
+          - task: UseDotNet@2
+          - task: UseDotNet@2
+          - bash: |
+              echo "Verify Repository Layout"
+          - script: |
+              dotnet restore
+              dotnet build
+              dotnet test
+          - task: PublishTestResults@2
+
+  - stage: DockerBuildPush
+    displayName: Build and Push Docker Images
+    condition: and(succeeded(), eq('${{ parameters.destroyTerraform }}', 'False'))
+    jobs:
+      - job: DockerBuild
+        displayName: Docker Build Push
+        pool:
+          vmImage: $(vmImageName)
+        steps:
+          - checkout: self
+          - task: AzureCLI@2
 
   - stage: DeployToAKS
     displayName: Deploy to AKS
