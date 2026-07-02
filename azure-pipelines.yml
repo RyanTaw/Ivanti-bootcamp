@@ -51,11 +51,11 @@ variables:
   - name: weatherDockerfile
     value: '$(appDirectory)/src/ContainerApp.WeatherApi/Dockerfile'
 
-  - name: acrName
-    value: 'avantibootcampdevacr'
+- name: acrName
+  value: 'avantiavantibootcampacr'
 
-  - name: containerRegistry
-    value: 'avantibootcampdevacr.azurecr.io'
+- name: containerRegistry
+  value: 'avantiavantibootcampacr.azurecr.io'
 
   - name: webImageRepository
     value: 'containerapp-web'
@@ -229,6 +229,17 @@ stages:
 
         steps:
           - checkout: self
+
+          - task: AzureCLI@2
+            displayName: Verify ACR
+            inputs:
+              azureSubscription: '$(azureServiceConnection)'
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                az acr show --name $(acrName) --output table
+                echo "Login Server:"
+                az acr show --name $(acrName) --query loginServer -o tsv
 
           - task: AzureCLI@2
             displayName: Build and Push Images to ACR
