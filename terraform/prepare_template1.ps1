@@ -29,6 +29,8 @@ try {
         throw "Variables file not found: $tfvars"
     }
 
+    $backendKey = "bootcamp-$($Environment.ToLower()).tfstate"
+
     $planFile = "tfplan"
     $planJson = "tfplan.json"
     $planText = "terraform-plan.txt"
@@ -38,6 +40,7 @@ try {
     Write-Host "Environment : $Environment"
     Write-Host "Folder      : $TerraformFolder"
     Write-Host "Variables   : $tfvars"
+    Write-Host "State Key   : $backendKey"
     Write-Host "Apply       : $Apply"
     Write-Host "Destroy     : $Destroy"
 
@@ -46,7 +49,13 @@ try {
         throw "Terraform fmt failed."
     }
 
-    terraform init
+    terraform init `
+        -reconfigure `
+        "-backend-config=resource_group_name=avanti-tfstate-rg" `
+        "-backend-config=storage_account_name=avantitfstate001" `
+        "-backend-config=container_name=tfstate" `
+        "-backend-config=key=$backendKey"
+
     if ($LASTEXITCODE -ne 0) {
         throw "Terraform init failed."
     }
