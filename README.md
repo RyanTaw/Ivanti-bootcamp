@@ -35,3 +35,10 @@ containerRegistry: 'avantibootcampdevacr.azurecr.io'
 resourceGroupName: 'avanti-bootcamp-dev-rg'
 aksClusterName: 'avanti-bootcamp-dev-aks'
 imagePullSecret: 'avanti-acr-auth'
+
+Terraform state
+az group create --name avanti-tfstate-rg --location eastus
+
+az storage account create --resource-group avanti-tfstate-rg --name avantitfstate001 --sku Standard_LRS --kind StorageV2
+
+az storage container create --account-name avantitfstate001 --name tfstate --auth-mode login
