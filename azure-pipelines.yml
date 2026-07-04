@@ -317,6 +317,11 @@ stages:
                   --name "$(aksClusterName)" \
                   --overwrite-existing
 
+                az aks update \
+                  --resource-group avanti-avanti-bootcamp-rg \
+                  --name avanti-avanti-bootcamp-aks \
+                  --attach-acr avantiavantibootcampacr
+
                 kubectl create namespace "$(namespace)" --dry-run=client -o yaml | kubectl apply -f -
 
                 WEB_IMAGE="$(containerRegistry)/$(webImageRepository):$(imageTag)"
