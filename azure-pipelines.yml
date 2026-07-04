@@ -69,13 +69,16 @@ variables:
     value: 'containerapp-weather'
 
   - name: imageTag
-    value: 'latest'
+    value: '$(Build.BuildId)'
 
   - name: resourceGroupName
     value: 'avanti-avanti-bootcamp-rg'
 
   - name: aksClusterName
     value: 'avanti-avanti-bootcamp-aks'
+
+  - name: namespace
+    value: 'bootcamp'
 
   - name: webDeploymentManifest
     value: '$(appDirectory)/src/ContainerApp.WebApp/k8s-deployment.yaml'
@@ -94,9 +97,6 @@ variables:
 
   - name: weatherContainerName
     value: 'containerapp-weatherapi'
-
-  - name: namespace
-    value: 'bootcamp'
 
   - name: vmImageName
     value: 'ubuntu-latest'
@@ -138,12 +138,21 @@ stages:
               TF_VAR_sql_admin_username: $(sqlAdminUsername)
               TF_VAR_sql_admin_password: $(sqlAdminPassword)
 
+          - task: PublishBuildArtifacts@1
+            displayName: Publish Terraform Plan Files
+            condition: always()
+            inputs:
+              PathtoPublish: '$(Build.SourcesDirectory)/terraform/modules/template1'
+              ArtifactName: 'terraform-plan-${{ parameters.environment }}'
+              publishLocation: Container
+
   - stage: TerraformApply
     displayName: Terraform Apply
     dependsOn: TerraformPlan
     condition: and(succeeded(), eq('${{ parameters.applyTerraform }}', 'True'), eq('${{ parameters.destroyTerraform }}', 'False'))
     jobs:
       - job: Apply
+        displayName: Terraform Apply
         pool:
           vmImage: windows-latest
 
@@ -151,6 +160,7 @@ stages:
           - checkout: self
 
           - task: TerraformInstaller@1
+            displayName: Install Terraform
             inputs:
               terraformVersion: 'latest'
 
@@ -174,6 +184,7 @@ stages:
     condition: and(succeeded(), eq('${{ parameters.destroyTerraform }}', 'True'), eq('${{ parameters.applyTerraform }}', 'False'))
     jobs:
       - job: Destroy
+        displayName: Terraform Destroy
         pool:
           vmImage: windows-latest
 
@@ -181,6 +192,7 @@ stages:
           - checkout: self
 
           - task: TerraformInstaller@1
+            displayName: Install Terraform
             inputs:
               terraformVersion: 'latest'
 
@@ -200,8 +212,8 @@ stages:
 
   - stage: DotNetBuildTest
     displayName: Build and Test .NET App
-    dependsOn: Terraform
-    condition: succeeded()
+    dependsOn: TerraformApply
+    condition: and(succeeded(), eq('${{ parameters.applyTerraform }}', 'True'), eq('${{ parameters.destroyTerraform }}', 'False'))
     jobs:
       - job: BuildTest
         displayName: Build and Test
@@ -223,19 +235,6 @@ stages:
               packageType: sdk
               version: '8.x'
 
-          - bash: |
-              set -e
-              echo "solutionPath=$(solutionPath)"
-              echo "testProject=$(testProject)"
-              echo "webDockerfile=$(webDockerfile)"
-              echo "weatherDockerfile=$(weatherDockerfile)"
-
-              test -f "$(solutionPath)"
-              test -f "$(testProject)"
-              test -f "$(webDockerfile)"
-              test -f "$(weatherDockerfile)"
-            displayName: Verify Repository Layout
-
           - script: |
               dotnet restore "$(solutionPath)"
               dotnet build "$(solutionPath)" --configuration Release --no-restore
@@ -252,7 +251,7 @@ stages:
   - stage: DockerBuildPush
     displayName: Build and Push Docker Images
     dependsOn: DotNetBuildTest
-    condition: succeeded()
+    condition: and(succeeded(), eq('${{ parameters.applyTerraform }}', 'True'), eq('${{ parameters.destroyTerraform }}', 'False'))
     jobs:
       - job: DockerBuild
         displayName: Docker Build Push
@@ -271,7 +270,6 @@ stages:
               inlineScript: |
                 set -e
 
-                az acr show --name "$(acrName)" --query loginServer -o tsv
                 az acr login --name "$(acrName)"
 
                 docker build \
@@ -291,10 +289,10 @@ stages:
 
                 docker push "$(containerRegistry)/$(weatherImageRepository):$(imageTag)"
                 docker push "$(containerRegistry)/$(weatherImageRepository):latest"
-                
+
   - stage: DeployToAKS
     displayName: Deploy to AKS
-    dependsOn: TerraformApply
+    dependsOn: DockerBuildPush
     condition: and(succeeded(), eq('${{ parameters.applyTerraform }}', 'True'), eq('${{ parameters.destroyTerraform }}', 'False'))
     jobs:
       - job: Deploy
