@@ -5,20 +5,20 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using ContainerApp.TodoApi.Models;
+using ContainerApp.ItemsApi.Models;
 using Microsoft.Extensions.Logging;
-using ContainerApp.TodoApi.Repository.Interfaces;
+using ContainerApp.ItemsApi.Repository.Interfaces;
 
-namespace ContainerApp.TodoApi.Controllers
+namespace ContainerApp.ItemsApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class TodoItemsController : ControllerBase
+    public class ItemsItemsController : ControllerBase
     {
-        private ITodoItemRepository _repository;
-        private ILogger<TodoItemsController> _logger;
+        private IItemsItemRepository _repository;
+        private ILogger<ItemsItemsController> _logger;
 
-        public TodoItemsController(ITodoItemRepository repository, ILogger<TodoItemsController> logger)
+        public ItemsItemsController(IItemsItemRepository repository, ILogger<ItemsItemsController> logger)
         {
             _repository = repository;
             _logger = logger;
@@ -26,11 +26,11 @@ namespace ContainerApp.TodoApi.Controllers
 
         // GET ALL
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TodoItem>>> GetTodoItems()
+        public async Task<ActionResult<IEnumerable<ItemsItem>>> GetItemsItems()
         {
             try
             {
-                _logger.LogInformation("Method - GetTodoItems");
+                _logger.LogInformation("Method - GetItemsItems");
                 return await _repository.GetAll();
             }
             catch(Exception ex)
@@ -42,21 +42,21 @@ namespace ContainerApp.TodoApi.Controllers
 
         // GET
         [HttpGet("{id}")]
-        public async Task<ActionResult<TodoItem>> GetTodoItem(int id)
+        public async Task<ActionResult<ItemsItem>> GetItemsItem(int id)
         {
             try
             {
-                _logger.LogInformation("Method - GetTodoItem");
+                _logger.LogInformation("Method - GetItemsItem");
                 _logger.LogInformation("Param - Id = " + id);
 
-                var todoItem = await _repository.Get(id);
+                var itemsItem = await _repository.Get(id);
 
-                if (todoItem == null)
+                if (itemsItem == null)
                 {
                     return NotFound();
                 }
 
-                return todoItem;
+                return itemsItem;
             }
             catch(Exception ex)
             {
@@ -68,20 +68,20 @@ namespace ContainerApp.TodoApi.Controllers
 
         // UPDATE
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutTodoItem(int id, TodoItem todoItem)
+        public async Task<IActionResult> PutItemsItem(int id, ItemsItem itemsItem)
         {
             try
             {
-                _logger.LogInformation("Method - PutTodoItem");
+                _logger.LogInformation("Method - PutItemsItem");
                 _logger.LogInformation("Param - Id = " + id);
-                _logger.LogInformation("Param - todoItem = " + todoItem);
+                _logger.LogInformation("Param - itemsItem = " + itemsItem);
                 
-                if (id != todoItem.Id)
+                if (id != itemsItem.Id)
                 {
                     return BadRequest();
                 }
 
-                await _repository.Update(todoItem);
+                await _repository.Update(itemsItem);
             
                 return Ok();
             }
@@ -94,16 +94,16 @@ namespace ContainerApp.TodoApi.Controllers
 
         // ADD
         [HttpPost]
-        public async Task<ActionResult<TodoItem>> PostTodoItem(TodoItem todoItem)
+        public async Task<ActionResult<ItemsItem>> PostItemsItem(ItemsItem itemsItem)
         {
             try
             {
-                _logger.LogInformation("Method - PostTodoItem");
-                _logger.LogInformation("Param - todoItem = " + todoItem);
+                _logger.LogInformation("Method - PostItemsItem");
+                _logger.LogInformation("Param - itemsItem = " + itemsItem);
 
-                await _repository.Add(todoItem);
+                await _repository.Add(itemsItem);
                 
-                return CreatedAtAction(nameof(GetTodoItem), new { id = todoItem.Id }, todoItem);
+                return CreatedAtAction(nameof(GetItemsItem), new { id = itemsItem.Id }, itemsItem);
             }
             catch(Exception ex)
             {
@@ -114,11 +114,11 @@ namespace ContainerApp.TodoApi.Controllers
 
         // DELETE
         [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteTodoItem(int id)
+        public async Task<ActionResult> DeleteItemsItem(int id)
         {
             try
             {
-                _logger.LogInformation("Method - DeleteTodoItem");
+                _logger.LogInformation("Method - DeleteItemsItem");
                 _logger.LogInformation("Param - Id = " + id);
 
                 bool res = await _repository.Delete(id);

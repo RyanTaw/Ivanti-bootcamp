@@ -8,30 +8,30 @@ services:
       context: containerapp.webapp
       dockerfile: Dockerfile
     environment:
-      - ApiAddress=http://containerapp-todoapi
+      - ApiAddress=http://containerapp-itemsapi
       - WeatherApi=http://containerapp-weatherapi
     ports:
       - 7171:80
     links:
-      - containerapp-todoapi
+      - containerapp-itemsapi
       - containerapp-weatherapi
     depends_on:
-      - containerapp-todoapi
+      - containerapp-itemsapi
       - containerapp-weatherapi
-  containerapp-todoapi:
-    container_name: containerapp-todoapi
-    image: containerapp-todoapi
+  containerapp-itemsapi:
+    container_name: containerapp-itemsapi
+    image: containerapp-itemsapi
     links:
       - containerapp-sqlserverdb
     depends_on:
       - containerapp-sqlserverdb
     build:
-      context: containerapp.todoapi
+      context: containerapp.itemsapi
       dockerfile: Dockerfile
     ports:
       - 7272:80
     environment:
-      - MyDbContext=Server=containerapp-sqlserverdb;Database=TodoItem_DB;User Id=sa;Password=P@ssw0rd;
+      - MyDbContext=Server=containerapp-sqlserverdb;Database=ItemsItem_DB;User Id=sa;Password=P@ssw0rd;
   containerapp-weatherapi:
     container_name: containerapp-weatherapi
     image: containerapp-weatherapi

@@ -11,11 +11,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
-using ContainerApp.TodoApi.Models;
-using ContainerApp.TodoApi.Repository;
-using ContainerApp.TodoApi.Repository.Interfaces;
+using ContainerApp.ItemsApi.Models;
+using ContainerApp.ItemsApi.Repository;
+using ContainerApp.ItemsApi.Repository.Interfaces;
 
-namespace ContainerApp.TodoApi
+namespace ContainerApp.ItemsApi
 {
     public class Startup
     {
@@ -29,7 +29,7 @@ namespace ContainerApp.TodoApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            //services.AddDbContext<TodoContext>(opt => opt.UseInMemoryDatabase("TodoList"));
+            //services.AddDbContext<ItemsContext>(opt => opt.UseInMemoryDatabase("ItemsList"));
             //services.AddDbContext<MyDbContext>(options => options.UseSqlite(Configuration.GetConnectionString("MyDbContext")));
             //services.AddDbContext<MyDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("MyDbContext")));
             services.AddDbContext<MyDbContext>(options => options.UseSqlServer(Configuration["MyDbContext"]));
@@ -39,7 +39,7 @@ namespace ContainerApp.TodoApi
             services.AddSwaggerGen();
 
             //repository
-            services.AddTransient<ITodoItemRepository, TodoItemRepository>();
+            services.AddTransient<IItemsItemRepository, ItemsItemRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

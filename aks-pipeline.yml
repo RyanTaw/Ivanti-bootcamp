@@ -35,8 +35,8 @@ variables:
   - name: weatherDockerfile
     value: '$(appDirectory)/src/ContainerApp.WeatherApi/Dockerfile'
 
-  - name: todoDockerfile
-    value: '$(appDirectory)/src/ContainerApp.TodoApi/Dockerfile'
+  - name: itemsDockerfile
+    value: '$(appDirectory)/src/ContainerApp.ItemsApi/Dockerfile'
 
   - name: acrName
     value: 'avantiavantibootcampacr'
@@ -50,8 +50,8 @@ variables:
   - name: weatherImageRepository
     value: 'containerapp-weather'
 
-  - name: todoImageRepository
-    value: 'containerapp-todoapi'
+  - name: itemsImageRepository
+    value: 'containerapp-itemsapi'
 
   - name: imageTag
     value: '$(Build.BuildId)'
@@ -71,8 +71,8 @@ variables:
   - name: weatherDeploymentManifest
     value: '$(appDirectory)/src/ContainerApp.WeatherApi/k8s-deployment.yaml'
 
-  - name: todoDeploymentManifest
-    value: '$(appDirectory)/src/ContainerApp.TodoApi/k8s-deployment.yaml'
+  - name: itemsDeploymentManifest
+    value: '$(appDirectory)/src/ContainerApp.ItemsApi/k8s-deployment.yaml'
 
   - name: webDeploymentName
     value: 'containerapp-webapp-deploy'
@@ -86,11 +86,11 @@ variables:
   - name: weatherContainerName
     value: 'containerapp-weatherapi'
 
-  - name: todoDeploymentName
-    value: 'containerapp-todoapi-deploy'
+  - name: itemsDeploymentName
+    value: 'containerapp-itemsapi-deploy'
 
-  - name: todoContainerName
-    value: 'containerapp-todoapi'
+  - name: itemsContainerName
+    value: 'containerapp-itemsapi'
 
   - name: vmImageName
     value: 'ubuntu-latest'
@@ -162,9 +162,9 @@ stages:
                 docker push "$(containerRegistry)/$(weatherImageRepository):$(imageTag)"
                 docker push "$(containerRegistry)/$(weatherImageRepository):latest"
 
-                docker build -f "$(todoDockerfile)" -t "$(containerRegistry)/$(todoImageRepository):$(imageTag)" -t "$(containerRegistry)/$(todoImageRepository):latest" "$(dockerBuildContext)"
-                docker push "$(containerRegistry)/$(todoImageRepository):$(imageTag)"
-                docker push "$(containerRegistry)/$(todoImageRepository):latest"
+                docker build -f "$(itemsDockerfile)" -t "$(containerRegistry)/$(itemsImageRepository):$(imageTag)" -t "$(containerRegistry)/$(itemsImageRepository):latest" "$(dockerBuildContext)"
+                docker push "$(containerRegistry)/$(itemsImageRepository):$(imageTag)"
+                docker push "$(containerRegistry)/$(itemsImageRepository):latest"
 
   - stage: DeployToAKS
     displayName: Deploy to AKS
@@ -196,24 +196,24 @@ stages:
 
                 WEB_IMAGE="$(containerRegistry)/$(webImageRepository):$(imageTag)"
                 WEATHER_IMAGE="$(containerRegistry)/$(weatherImageRepository):$(imageTag)"
-                TODO_IMAGE="$(containerRegistry)/$(todoImageRepository):$(imageTag)"
+                TODO_IMAGE="$(containerRegistry)/$(itemsImageRepository):$(imageTag)"
 
                 cp "$(webDeploymentManifest)" web-deployment.yaml
                 cp "$(weatherDeploymentManifest)" weather-deployment.yaml
-                cp "$(todoDeploymentManifest)" todo-deployment.yaml
+                cp "$(itemsDeploymentManifest)" items-deployment.yaml
 
                 sed -i "s|_ImageUrlApp_|$WEB_IMAGE|g" web-deployment.yaml
                 sed -i "s|_ImageUrlApp_|$WEATHER_IMAGE|g" weather-deployment.yaml
-                sed -i "s|_ImageUrlApp_|$TODO_IMAGE|g" todo-deployment.yaml
+                sed -i "s|_ImageUrlApp_|$TODO_IMAGE|g" items-deployment.yaml
 
                 kubectl apply -f web-deployment.yaml -n "$(namespace)"
                 kubectl apply -f weather-deployment.yaml -n "$(namespace)"
-                kubectl apply -f todo-deployment.yaml -n "$(namespace)"
+                kubectl apply -f items-deployment.yaml -n "$(namespace)"
 
                 kubectl set image deployment/$(webDeploymentName) "$(webContainerName)=$WEB_IMAGE" -n "$(namespace)"
                 kubectl set image deployment/$(weatherDeploymentName) "$(weatherContainerName)=$WEATHER_IMAGE" -n "$(namespace)"
-                kubectl set image deployment/$(todoDeploymentName) "$(todoContainerName)=$TODO_IMAGE" -n "$(namespace)"
+                kubectl set image deployment/$(itemsDeploymentName) "$(itemsContainerName)=$TODO_IMAGE" -n "$(namespace)"
 
                 kubectl rollout status deployment/$(webDeploymentName) -n "$(namespace)"
                 kubectl rollout status deployment/$(weatherDeploymentName) -n "$(namespace)"
-                kubectl rollout status deployment/$(todoDeploymentName) -n "$(namespace)"
+                kubectl rollout status deployment/$(itemsDeploymentName) -n "$(namespace)"

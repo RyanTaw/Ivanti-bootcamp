@@ -95,14 +95,14 @@ jobs:
           username: ${{ env.ACR_LOGIN }}
           password: ${{ env.ACR_PASSWORD }}
       
-      - name: Build and push TodoApi image
+      - name: Build and push ItemsApi image
         uses: docker/build-push-action@v3
         with:
-          context: src/ContainerApp.TodoApi
-          file: src/ContainerApp.TodoApi/Dockerfile
+          context: src/ContainerApp.ItemsApi
+          file: src/ContainerApp.ItemsApi/Dockerfile
           tags: |
-            ${{ env.ACR_URL }}/containerapp.todoapi:${{ GITHUB.RUN_NUMBER }}
-            ${{ env.ACR_URL }}/containerapp.todoapi:latest
+            ${{ env.ACR_URL }}/containerapp.itemsapi:${{ GITHUB.RUN_NUMBER }}
+            ${{ env.ACR_URL }}/containerapp.itemsapi:latest
           push: true
 
       - name: Build and push WeatherApi image
@@ -129,20 +129,20 @@ jobs:
         run: |
           echo Build Number = ${{ GITHUB.RUN_NUMBER }}
           urlApp=${{ env.ACR_URL }}/containerapp.webapp:${{ GITHUB.RUN_NUMBER }}
-          urlTodoApi=${{ env.ACR_URL }}/containerapp.todoapi:${{ GITHUB.RUN_NUMBER }}
+          urlItemsApi=${{ env.ACR_URL }}/containerapp.itemsapi:${{ GITHUB.RUN_NUMBER }}
           urlWeatherApi=${{ env.ACR_URL }}/containerapp.weatherapi:${{ GITHUB.RUN_NUMBER }}
-          sqlConnString="Server=tcp:${{ env.AZ_SQLSERVER_NAME }}.database.windows.net,1433;Initial Catalog=TodoItem_DB;Persist Security Info=False;User ID=${{ secrets.AZURE_SQL_USERNAME }};Password=${{ secrets.AZURE_SQL_PASSWORD }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+          sqlConnString="Server=tcp:${{ env.AZ_SQLSERVER_NAME }}.database.windows.net,1433;Initial Catalog=ItemsItem_DB;Persist Security Info=False;User ID=${{ secrets.AZURE_SQL_USERNAME }};Password=${{ secrets.AZURE_SQL_PASSWORD }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
 
           echo URL APP = $urlApp
-          echo URL TODO API = $urlTodoApi
+          echo URL TODO API = $urlItemsApi
           echo URL WEATHER API = $urlWeatherApi
 
           echo "*** Replace ContainerApp.WebApp/k8s-deployment.yaml ***"
           sed -i "s|_ImageUrlApp_|$urlApp|g" src/ContainerApp.WebApp/k8s-deployment.yaml
 
-          echo "*** Replace ContainerApp.TodoApi/k8s-deployment.yaml ***"
-          sed -i "s|_ImageUrlApi_|$urlTodoApi|g" src/ContainerApp.TodoApi/k8s-deployment.yaml
-          sed -i "s|_ConnString_|$sqlConnString|g" src/ContainerApp.TodoApi/k8s-deployment.yaml
+          echo "*** Replace ContainerApp.ItemsApi/k8s-deployment.yaml ***"
+          sed -i "s|_ImageUrlApi_|$urlItemsApi|g" src/ContainerApp.ItemsApi/k8s-deployment.yaml
+          sed -i "s|_ConnString_|$sqlConnString|g" src/ContainerApp.ItemsApi/k8s-deployment.yaml
 
           echo "*** Replace ContainerApp.WeatherApi/k8s-deployment.yaml ***"
           sed -i "s|_ImageUrlApi_|$urlWeatherApi|g" src/ContainerApp.WeatherApi/k8s-deployment.yaml
@@ -153,7 +153,7 @@ jobs:
           name: k8s
           path: |
             src/ContainerApp.WebApp/k8s-deployment.yaml
-            src/ContainerApp.TodoApi/k8s-deployment.yaml
+            src/ContainerApp.ItemsApi/k8s-deployment.yaml
             src/ContainerApp.WeatherApi/k8s-deployment.yaml
         
   release-to-dev:
@@ -188,5 +188,5 @@ jobs:
           namespace: default
           manifests: |
             my-app-artifact/ContainerApp.WebApp/k8s-deployment.yaml
-            my-app-artifact/ContainerApp.TodoApi/k8s-deployment.yaml
+            my-app-artifact/ContainerApp.ItemsApi/k8s-deployment.yaml
             my-app-artifact/ContainerApp.WeatherApi/k8s-deployment.yaml

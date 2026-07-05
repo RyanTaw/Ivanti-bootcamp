@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.3.32929.385
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ContainerApp.TodoApi", "ContainerApp.TodoApi\ContainerApp.TodoApi.csproj", "{45EBFFE0-7C20-4258-8FB0-3851B14938E2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ContainerApp.ItemsApi", "ContainerApp.ItemsApi\ContainerApp.ItemsApi.csproj", "{45EBFFE0-7C20-4258-8FB0-3851B14938E2}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ContainerApp.WebApp", "ContainerApp.WebApp\ContainerApp.WebApp.csproj", "{15633E57-CE20-4D08-9B6D-E0EC72191942}"
 EndProject

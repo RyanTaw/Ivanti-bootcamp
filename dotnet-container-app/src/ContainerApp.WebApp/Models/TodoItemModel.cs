@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ContainerApp.WebApp.Models
 {
-    public class TodoItemModel
+    public class ItemsItemModel
     {
         public long Id { get; set; }
         //[Required]

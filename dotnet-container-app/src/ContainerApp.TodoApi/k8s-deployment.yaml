@@ -1,13 +1,13 @@
 ﻿kind: Service
 apiVersion: v1
 metadata:
-  name: containerapp-todoapi-svc
+  name: containerapp-itemsapi-svc
   annotations:
     service.beta.kubernetes.io/azure-load-balancer-internal: "true"
 spec:
   type: LoadBalancer
   selector:
-    app: containerapp-todoapi
+    app: containerapp-itemsapi
     tier: backend
   ports:
     - protocol: TCP
@@ -17,23 +17,23 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: containerapp-todoapi-deploy
+  name: containerapp-itemsapi-deploy
   namespace: bootcamp
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: containerapp-todoapi
+      app: containerapp-itemsapi
       tier: backend
   template:
     metadata:
       labels:
-        app: containerapp-todoapi
+        app: containerapp-itemsapi
         tier: backend
     spec:
       containers:
-        - name: containerapp-todoapi
-          image: avantiavantibootcampacr.azurecr.io/containerapp-todoapi:latest
+        - name: containerapp-itemsapi
+          image: avantiavantibootcampacr.azurecr.io/containerapp-itemsapi:latest
           env:
             - name: MyDbContext
               value: "Server=tcp:avanti-bootcamp-sql.database.windows.net,1433;Initial Catalog=bootcampdb;Persist Security Info=False;User ID=sqladminuser;Password=Ryanpassword123!;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
@@ -57,13 +57,13 @@ spec:
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
-  name: containerapp-todoapi-scaler
+  name: containerapp-itemsapi-scaler
   namespace: bootcamp
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: containerapp-todoapi-deploy
+    name: containerapp-itemsapi-deploy
   minReplicas: 1
   maxReplicas: 5
   targetCPUUtilizationPercentage: 20

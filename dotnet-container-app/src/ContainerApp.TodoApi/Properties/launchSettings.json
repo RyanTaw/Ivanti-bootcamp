@@ -17,7 +17,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "ContainerApp.TodoApi": {
+    "ContainerApp.ItemsApi": {
       "commandName": "Project",
       "launchBrowser": true,
       "launchUrl": "swagger",

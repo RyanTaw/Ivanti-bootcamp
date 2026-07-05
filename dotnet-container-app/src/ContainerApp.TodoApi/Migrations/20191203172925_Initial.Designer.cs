@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using ContainerApp.TodoApi.Models;
+using ContainerApp.ItemsApi.Models;
 
-namespace ContainerApp.TodoApi.Migrations
+namespace ContainerApp.ItemsApi.Migrations
 {
     [DbContext(typeof(MyDbContext))]
     [Migration("20191203172925_Initial")]
@@ -20,7 +20,7 @@ namespace ContainerApp.TodoApi.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("aspnetcorewebapi.Models.TodoItem", b =>
+            modelBuilder.Entity("aspnetcorewebapi.Models.ItemsItem", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -37,7 +37,7 @@ namespace ContainerApp.TodoApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TodoItems");
+                    b.ToTable("ItemsItems");
                 });
 #pragma warning restore 612, 618
         }

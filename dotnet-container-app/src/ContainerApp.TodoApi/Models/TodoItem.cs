@@ -1,9 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ContainerApp.TodoApi.Models
+namespace ContainerApp.ItemsApi.Models
 {
-    public class TodoItem
+    public class ItemsItem
     {
         [Key]
         public int Id { get; set; }
