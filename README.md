@@ -60,5 +60,15 @@ az sql server firewall-rule create --resource-group avanti-avanti-bootcamp-rg --
 
 kubectl create secret generic sql-connection-secret --namespace bootcamp --from-literal=SQL_CONNECTION_STRING="Server=tcp:avanti-bootcamp-sql.database.windows.net,1433;Initial Catalog=bootcampdb;Persist Security Info=False;User ID=sqladminuser;Password=Ryanpassword123!;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;" --dry-run=client -o yaml | kubectl apply -f -
 
+
+docker build -f dotnet-container-app/src/ContainerApp.WebApp/Dockerfile -t avantiavantibootcampacr.azurecr.io/containerapp-web:fix-newtonsoft dotnet-container-app/src
+
+docker push avantiavantibootcampacr.azurecr.io/containerapp-web:fix-newtonsoft
+
+kubectl set image deployment/containerapp-webapp-deploy containerapp-webapp=avantiavantibootcampacr.azurecr.io/containerapp-web:fix-newtonsoft -n bootcamp
+
+kubectl rollout restart deployment/containerapp-webapp-deploy -n bootcamp
+kubectl rollout status deployment/containerapp-webapp-deploy -n bootcamp
+
 Endpoint
 http://20.242.237.226
