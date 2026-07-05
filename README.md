@@ -42,3 +42,7 @@ az group create --name avanti-tfstate-rg --location eastus
 az storage account create --resource-group avanti-tfstate-rg --name avantitfstate001 --sku Standard_LRS --kind StorageV2
 
 az storage container create --account-name avantitfstate001 --name tfstate --auth-mode login
+
+az aks get-credentials --resource-group avanti-avanti-bootcamp-rg --name avanti-avanti-bootcamp-aks --overwrite-existing
+
+http://20.242.237.226
