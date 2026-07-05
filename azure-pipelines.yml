@@ -56,6 +56,9 @@ variables:
   - name: weatherDockerfile
     value: '$(appDirectory)/src/ContainerApp.WeatherApi/Dockerfile'
 
+  - name: todoDockerfile
+    value: '$(appDirectory)/src/ContainerApp.TodoApi/Dockerfile'
+
   - name: acrName
     value: 'avantiavantibootcampacr'
 
@@ -67,6 +70,9 @@ variables:
 
   - name: weatherImageRepository
     value: 'containerapp-weather'
+
+  - name: todoImageRepository
+    value: 'containerapp-todoapi'
 
   - name: imageTag
     value: '$(Build.BuildId)'
@@ -86,6 +92,9 @@ variables:
   - name: weatherDeploymentManifest
     value: '$(appDirectory)/src/ContainerApp.WeatherApi/k8s-deployment.yaml'
 
+  - name: todoDeploymentManifest
+    value: '$(appDirectory)/src/ContainerApp.TodoApi/k8s-deployment.yaml'
+
   - name: webDeploymentName
     value: 'containerapp-webapp-deploy'
 
@@ -98,6 +107,12 @@ variables:
   - name: weatherContainerName
     value: 'containerapp-weatherapi'
 
+  - name: todoDeploymentName
+    value: 'containerapp-todoapi-deploy'
+
+  - name: todoContainerName
+    value: 'containerapp-todoapi'
+
   - name: vmImageName
     value: 'ubuntu-latest'
 
@@ -106,10 +121,8 @@ stages:
     displayName: Terraform Plan
     jobs:
       - job: Plan
-        displayName: Terraform Plan
         pool:
           vmImage: windows-latest
-
         steps:
           - checkout: self
 
@@ -120,7 +133,6 @@ stages:
             displayName: Validate Terraform Selection
 
           - task: TerraformInstaller@1
-            displayName: Install Terraform
             inputs:
               terraformVersion: 'latest'
 
@@ -138,29 +150,18 @@ stages:
               TF_VAR_sql_admin_username: $(sqlAdminUsername)
               TF_VAR_sql_admin_password: $(sqlAdminPassword)
 
-          - task: PublishBuildArtifacts@1
-            displayName: Publish Terraform Plan Files
-            condition: always()
-            inputs:
-              PathtoPublish: '$(Build.SourcesDirectory)/terraform/modules/template1'
-              ArtifactName: 'terraform-plan-${{ parameters.environment }}'
-              publishLocation: Container
-
   - stage: TerraformApply
     displayName: Terraform Apply
     dependsOn: TerraformPlan
     condition: and(succeeded(), eq('${{ parameters.applyTerraform }}', 'True'), eq('${{ parameters.destroyTerraform }}', 'False'))
     jobs:
       - job: Apply
-        displayName: Terraform Apply
         pool:
           vmImage: windows-latest
-
         steps:
           - checkout: self
 
           - task: TerraformInstaller@1
-            displayName: Install Terraform
             inputs:
               terraformVersion: 'latest'
 
@@ -184,15 +185,12 @@ stages:
     condition: and(succeeded(), eq('${{ parameters.destroyTerraform }}', 'True'), eq('${{ parameters.applyTerraform }}', 'False'))
     jobs:
       - job: Destroy
-        displayName: Terraform Destroy
         pool:
           vmImage: windows-latest
-
         steps:
           - checkout: self
 
           - task: TerraformInstaller@1
-            displayName: Install Terraform
             inputs:
               terraformVersion: 'latest'
 
@@ -216,21 +214,17 @@ stages:
     condition: and(succeeded(), eq('${{ parameters.applyTerraform }}', 'True'), eq('${{ parameters.destroyTerraform }}', 'False'))
     jobs:
       - job: BuildTest
-        displayName: Build and Test
         pool:
           vmImage: $(vmImageName)
-
         steps:
           - checkout: self
 
           - task: UseDotNet@2
-            displayName: Install .NET 6 SDK
             inputs:
               packageType: sdk
               version: '6.x'
 
           - task: UseDotNet@2
-            displayName: Install .NET 8 SDK
             inputs:
               packageType: sdk
               version: '8.x'
@@ -242,7 +236,6 @@ stages:
             displayName: Restore Build Test
 
           - task: PublishTestResults@2
-            displayName: Publish Test Results
             condition: always()
             inputs:
               testResultsFormat: VSTest
@@ -254,10 +247,8 @@ stages:
     condition: and(succeeded(), eq('${{ parameters.applyTerraform }}', 'True'), eq('${{ parameters.destroyTerraform }}', 'False'))
     jobs:
       - job: DockerBuild
-        displayName: Docker Build Push
         pool:
           vmImage: $(vmImageName)
-
         steps:
           - checkout: self
 
@@ -272,23 +263,17 @@ stages:
 
                 az acr login --name "$(acrName)"
 
-                docker build \
-                  -f "$(webDockerfile)" \
-                  -t "$(containerRegistry)/$(webImageRepository):$(imageTag)" \
-                  -t "$(containerRegistry)/$(webImageRepository):latest" \
-                  "$(dockerBuildContext)"
-
+                docker build -f "$(webDockerfile)" -t "$(containerRegistry)/$(webImageRepository):$(imageTag)" -t "$(containerRegistry)/$(webImageRepository):latest" "$(dockerBuildContext)"
                 docker push "$(containerRegistry)/$(webImageRepository):$(imageTag)"
                 docker push "$(containerRegistry)/$(webImageRepository):latest"
 
-                docker build \
-                  -f "$(weatherDockerfile)" \
-                  -t "$(containerRegistry)/$(weatherImageRepository):$(imageTag)" \
-                  -t "$(containerRegistry)/$(weatherImageRepository):latest" \
-                  "$(dockerBuildContext)"
-
+                docker build -f "$(weatherDockerfile)" -t "$(containerRegistry)/$(weatherImageRepository):$(imageTag)" -t "$(containerRegistry)/$(weatherImageRepository):latest" "$(dockerBuildContext)"
                 docker push "$(containerRegistry)/$(weatherImageRepository):$(imageTag)"
                 docker push "$(containerRegistry)/$(weatherImageRepository):latest"
+
+                docker build -f "$(todoDockerfile)" -t "$(containerRegistry)/$(todoImageRepository):$(imageTag)" -t "$(containerRegistry)/$(todoImageRepository):latest" "$(dockerBuildContext)"
+                docker push "$(containerRegistry)/$(todoImageRepository):$(imageTag)"
+                docker push "$(containerRegistry)/$(todoImageRepository):latest"
 
   - stage: DeployToAKS
     displayName: Deploy to AKS
@@ -296,10 +281,8 @@ stages:
     condition: and(succeeded(), eq('${{ parameters.applyTerraform }}', 'True'), eq('${{ parameters.destroyTerraform }}', 'False'))
     jobs:
       - job: Deploy
-        displayName: Deploy Apps to AKS
         pool:
           vmImage: $(vmImageName)
-
         steps:
           - checkout: self
 
@@ -317,27 +300,28 @@ stages:
                   --name "$(aksClusterName)" \
                   --overwrite-existing
 
-                az aks update \
-                  --resource-group avanti-avanti-bootcamp-rg \
-                  --name avanti-avanti-bootcamp-aks \
-                  --attach-acr avantiavantibootcampacr
-
                 kubectl create namespace "$(namespace)" --dry-run=client -o yaml | kubectl apply -f -
 
                 WEB_IMAGE="$(containerRegistry)/$(webImageRepository):$(imageTag)"
                 WEATHER_IMAGE="$(containerRegistry)/$(weatherImageRepository):$(imageTag)"
+                TODO_IMAGE="$(containerRegistry)/$(todoImageRepository):$(imageTag)"
 
                 cp "$(webDeploymentManifest)" web-deployment.yaml
                 cp "$(weatherDeploymentManifest)" weather-deployment.yaml
+                cp "$(todoDeploymentManifest)" todo-deployment.yaml
 
                 sed -i "s|_ImageUrlApp_|$WEB_IMAGE|g" web-deployment.yaml
                 sed -i "s|_ImageUrlApp_|$WEATHER_IMAGE|g" weather-deployment.yaml
+                sed -i "s|_ImageUrlApp_|$TODO_IMAGE|g" todo-deployment.yaml
 
                 kubectl apply -f web-deployment.yaml -n "$(namespace)"
                 kubectl apply -f weather-deployment.yaml -n "$(namespace)"
+                kubectl apply -f todo-deployment.yaml -n "$(namespace)"
 
                 kubectl set image deployment/$(webDeploymentName) "$(webContainerName)=$WEB_IMAGE" -n "$(namespace)"
                 kubectl set image deployment/$(weatherDeploymentName) "$(weatherContainerName)=$WEATHER_IMAGE" -n "$(namespace)"
+                kubectl set image deployment/$(todoDeploymentName) "$(todoContainerName)=$TODO_IMAGE" -n "$(namespace)"
 
                 kubectl rollout status deployment/$(webDeploymentName) -n "$(namespace)"
                 kubectl rollout status deployment/$(weatherDeploymentName) -n "$(namespace)"
+                kubectl rollout status deployment/$(todoDeploymentName) -n "$(namespace)"

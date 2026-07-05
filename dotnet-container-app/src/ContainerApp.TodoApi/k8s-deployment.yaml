@@ -18,6 +18,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: containerapp-todoapi-deploy
+  namespace: bootcamp
 spec:
   replicas: 1
   selector:
@@ -32,26 +33,32 @@ spec:
     spec:
       containers:
         - name: containerapp-todoapi
-          image: "_ImageUrlApi_"
+          image: avantiavantibootcampacr.azurecr.io/containerapp-todoapi:latest
           env:
             - name: MyDbContext
-              value: "_ConnString_"
+              value: "Server=tcp:avanti-bootcamp-sql.database.windows.net,1433;Initial Catalog=bootcampdb;Persist Security Info=False;User ID=sqladminuser;Password=Ryanpassword123!;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+          # env:
+          #   - name: ConnectionStrings__DefaultConnection
+          #     valueFrom:
+          #       secretKeyRef:
+          #         name: sql-connection-secret
+          #         key: SQL_CONNECTION_STRING
           ports:
             - name: http
               containerPort: 80
           resources:
             requests:
-              cpu: "250m"
+              cpu: "100m"
               memory: "64Mi"
             limits:
-              cpu: "500m"
+              cpu: "250m"
               memory: "128Mi"
 ---
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
   name: containerapp-todoapi-scaler
-  namespace: default
+  namespace: bootcamp
 spec:
   scaleTargetRef:
     apiVersion: apps/v1

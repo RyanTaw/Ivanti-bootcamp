@@ -43,6 +43,22 @@ az storage account create --resource-group avanti-tfstate-rg --name avantitfstat
 
 az storage container create --account-name avantitfstate001 --name tfstate --auth-mode login
 
-az aks get-credentials --resource-group avanti-avanti-bootcamp-rg --name avanti-avanti-bootcamp-aks --overwrite-existing
 
+Aks Cmds
+az login --use-device-code
+az aks get-credentials --resource-group avanti-avanti-bootcamp-rg --name avanti-avanti-bootcamp-aks --overwrite-existing
+kubectl logs deployment/containerapp-webapp-deploy -n bootcamp 
+kubectl get services --all-namespaces
+kubectl get pods --all-namespaces 
+
+SQLdb cmds
+az sql server create --name avanti-bootcamp-sql --resource-group avanti-avanti-bootcamp-rg --location centralus --admin-user sqladminuser --admin-password "Ryanpassword123!"
+
+az sql db create --resource-group avanti-avanti-bootcamp-rg --server avanti-bootcamp-sql --name bootcampdb --service-objective Basic
+
+az sql server firewall-rule create --resource-group avanti-avanti-bootcamp-rg --server avanti-bootcamp-sql --name AllowAzureServices --start-ip-address 0.0.0.0 --end-ip-address 0.0.0.0
+
+kubectl create secret generic sql-connection-secret --namespace bootcamp --from-literal=SQL_CONNECTION_STRING="Server=tcp:avanti-bootcamp-sql.database.windows.net,1433;Initial Catalog=bootcampdb;Persist Security Info=False;User ID=sqladminuser;Password=Ryanpassword123!;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;" --dry-run=client -o yaml | kubectl apply -f -
+
+Endpoint
 http://20.242.237.226
