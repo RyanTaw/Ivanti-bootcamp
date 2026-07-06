@@ -11,9 +11,9 @@ This is the application architecture diagram
 The project is divided as follows:
 
 - **src/ContainerApp.IAC:** Bicep files for create Azure environment
-- **src/ContainerApp.ItemsApi:** TODO API to communicate with SQL Server database
+- **src/ContainerApp.ItemsApi:** ITEMS API to communicate with SQL Server database
 - **src/ContainerApp.WeatherApi:** WEATHER API simulates weather forecasts
-- **src/ContainerApp.WebApp:** Web Application interact with rest TODO API and
+- **src/ContainerApp.WebApp:** Web Application interact with rest ITEMS API and
 - **src/ContainerApp.Test:** Unit Testing project
 
 This sample application can use the following Azure features:

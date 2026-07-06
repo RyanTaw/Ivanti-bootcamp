@@ -196,7 +196,7 @@ stages:
 
                 WEB_IMAGE="$(containerRegistry)/$(webImageRepository):$(imageTag)"
                 WEATHER_IMAGE="$(containerRegistry)/$(weatherImageRepository):$(imageTag)"
-                TODO_IMAGE="$(containerRegistry)/$(itemsImageRepository):$(imageTag)"
+                ITEMS_IMAGE="$(containerRegistry)/$(itemsImageRepository):$(imageTag)"
 
                 cp "$(webDeploymentManifest)" web-deployment.yaml
                 cp "$(weatherDeploymentManifest)" weather-deployment.yaml
@@ -204,7 +204,7 @@ stages:
 
                 sed -i "s|_ImageUrlApp_|$WEB_IMAGE|g" web-deployment.yaml
                 sed -i "s|_ImageUrlApp_|$WEATHER_IMAGE|g" weather-deployment.yaml
-                sed -i "s|_ImageUrlApp_|$TODO_IMAGE|g" items-deployment.yaml
+                sed -i "s|_ImageUrlApp_|$ITEMS_IMAGE|g" items-deployment.yaml
 
                 kubectl apply -f web-deployment.yaml -n "$(namespace)"
                 kubectl apply -f weather-deployment.yaml -n "$(namespace)"
@@ -212,7 +212,7 @@ stages:
 
                 kubectl set image deployment/$(webDeploymentName) "$(webContainerName)=$WEB_IMAGE" -n "$(namespace)"
                 kubectl set image deployment/$(weatherDeploymentName) "$(weatherContainerName)=$WEATHER_IMAGE" -n "$(namespace)"
-                kubectl set image deployment/$(itemsDeploymentName) "$(itemsContainerName)=$TODO_IMAGE" -n "$(namespace)"
+                kubectl set image deployment/$(itemsDeploymentName) "$(itemsContainerName)=$ITEMS_IMAGE" -n "$(namespace)"
 
                 kubectl rollout status deployment/$(webDeploymentName) -n "$(namespace)"
                 kubectl rollout status deployment/$(weatherDeploymentName) -n "$(namespace)"
