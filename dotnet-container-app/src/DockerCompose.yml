@@ -31,7 +31,7 @@ services:
     ports:
       - 7272:80
     environment:
-      - MyDbContext=Server=containerapp-sqlserverdb;Database=ItemsItem_DB;User Id=sa;Password=P@ssw0rd;
+      - MyDbContext=Server=containerapp-sqlserverdb;Database=Items_DB;User Id=sa;Password=P@ssw0rd;
   containerapp-weatherapi:
     container_name: containerapp-weatherapi
     image: containerapp-weatherapi

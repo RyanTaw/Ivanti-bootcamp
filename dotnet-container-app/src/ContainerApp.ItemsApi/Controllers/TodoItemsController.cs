@@ -15,10 +15,10 @@ namespace ContainerApp.ItemsApi.Controllers
     [ApiController]
     public class ItemsController : ControllerBase
     {
-        private IItemsItemRepository _repository;
+        private IItemsRepository _repository;
         private ILogger<ItemsController> _logger;
 
-        public ItemsController(IItemsItemRepository repository, ILogger<ItemsController> logger)
+        public ItemsController(IItemsRepository repository, ILogger<ItemsController> logger)
         {
             _repository = repository;
             _logger = logger;
@@ -26,7 +26,7 @@ namespace ContainerApp.ItemsApi.Controllers
 
         // GET ALL
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ItemsItem>>> GetItems()
+        public async Task<ActionResult<IEnumerable<Items>>> GetItems()
         {
             try
             {
@@ -42,21 +42,21 @@ namespace ContainerApp.ItemsApi.Controllers
 
         // GET
         [HttpGet("{id}")]
-        public async Task<ActionResult<ItemsItem>> GetItemsItem(int id)
+        public async Task<ActionResult<Items>> GetItems(int id)
         {
             try
             {
-                _logger.LogInformation("Method - GetItemsItem");
+                _logger.LogInformation("Method - GetItems");
                 _logger.LogInformation("Param - Id = " + id);
 
-                var itemsItem = await _repository.Get(id);
+                var Items = await _repository.Get(id);
 
-                if (itemsItem == null)
+                if (Items == null)
                 {
                     return NotFound();
                 }
 
-                return itemsItem;
+                return Items;
             }
             catch(Exception ex)
             {
@@ -68,20 +68,20 @@ namespace ContainerApp.ItemsApi.Controllers
 
         // UPDATE
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutItemsItem(int id, ItemsItem itemsItem)
+        public async Task<IActionResult> PutItems(int id, Items Items)
         {
             try
             {
-                _logger.LogInformation("Method - PutItemsItem");
+                _logger.LogInformation("Method - PutItems");
                 _logger.LogInformation("Param - Id = " + id);
-                _logger.LogInformation("Param - itemsItem = " + itemsItem);
+                _logger.LogInformation("Param - Items = " + Items);
                 
-                if (id != itemsItem.Id)
+                if (id != Items.Id)
                 {
                     return BadRequest();
                 }
 
-                await _repository.Update(itemsItem);
+                await _repository.Update(Items);
             
                 return Ok();
             }
@@ -94,16 +94,16 @@ namespace ContainerApp.ItemsApi.Controllers
 
         // ADD
         [HttpPost]
-        public async Task<ActionResult<ItemsItem>> PostItemsItem(ItemsItem itemsItem)
+        public async Task<ActionResult<Items>> PostItems(Items Items)
         {
             try
             {
-                _logger.LogInformation("Method - PostItemsItem");
-                _logger.LogInformation("Param - itemsItem = " + itemsItem);
+                _logger.LogInformation("Method - PostItems");
+                _logger.LogInformation("Param - Items = " + Items);
 
-                await _repository.Add(itemsItem);
+                await _repository.Add(Items);
                 
-                return CreatedAtAction(nameof(GetItemsItem), new { id = itemsItem.Id }, itemsItem);
+                return CreatedAtAction(nameof(GetItems), new { id = Items.Id }, Items);
             }
             catch(Exception ex)
             {
@@ -114,11 +114,11 @@ namespace ContainerApp.ItemsApi.Controllers
 
         // DELETE
         [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteItemsItem(int id)
+        public async Task<ActionResult> DeleteItems(int id)
         {
             try
             {
-                _logger.LogInformation("Method - DeleteItemsItem");
+                _logger.LogInformation("Method - DeleteItems");
                 _logger.LogInformation("Param - Id = " + id);
 
                 bool res = await _repository.Delete(id);

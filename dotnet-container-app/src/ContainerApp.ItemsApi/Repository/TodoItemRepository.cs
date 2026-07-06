@@ -8,22 +8,22 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ContainerApp.ItemsApi.Repository
 {
-    public class ItemsItemRepository : IItemsItemRepository
+    public class ItemsRepository : IItemsRepository
     {
         private readonly MyDbContext _context;
 
-        public ItemsItemRepository(MyDbContext context)
+        public ItemsRepository(MyDbContext context)
         {
             _context = context;
         }
-        async Task<bool> IItemsItemRepository.Add(ItemsItem model)
+        async Task<bool> IItemsRepository.Add(Items model)
         {
             _context.Items.Add(model);
             int res = await _context.SaveChangesAsync();
             return true;
         }
 
-        async Task<bool> IItemsItemRepository.Delete(int id)
+        async Task<bool> IItemsRepository.Delete(int id)
         {
             var _item = await _context.Items.FindAsync(id);
             _context.Items.Remove(_item);
@@ -31,17 +31,17 @@ namespace ContainerApp.ItemsApi.Repository
             return true;
         }
 
-        async Task<ItemsItem> IItemsItemRepository.Get(int id)
+        async Task<Items> IItemsRepository.Get(int id)
         {
             return await _context.Items.FindAsync(id);
         }
 
-        async Task<List<ItemsItem>> IItemsItemRepository.GetAll()
+        async Task<List<Items>> IItemsRepository.GetAll()
         {
             return await _context.Items.ToListAsync();
         }
 
-        async Task<bool> IItemsItemRepository.Update(ItemsItem model)
+        async Task<bool> IItemsRepository.Update(Items model)
         {
             _context.Entry(model).State = EntityState.Modified;
             int res = await _context.SaveChangesAsync();

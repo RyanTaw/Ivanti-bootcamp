@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ContainerApp.ItemsApi.Models
 {
-    public class ItemsItem
+    public class Items
     {
         [Key]
         public int Id { get; set; }

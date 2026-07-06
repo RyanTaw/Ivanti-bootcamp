@@ -9,9 +9,9 @@ using ContainerApp.ItemsApi.Models;
 namespace ContainerApp.Test
 {
     [TestClass]
-    public class ItemsItemIntegrationTest
+    public class ItemsIntegrationTest
     {
-        private IItemsItemRepository _repository;
+        private IItemsRepository _repository;
 
         [TestInitialize()]
         public void Initialize()
@@ -20,7 +20,7 @@ namespace ContainerApp.Test
                 .UseInMemoryDatabase(databaseName: "MyDataDatabase")
                 .Options;
 
-            _repository = new ItemsItemRepository(new MyDbContext(options));
+            _repository = new ItemsRepository(new MyDbContext(options));
         }
 
         [TestMethod]
@@ -30,10 +30,10 @@ namespace ContainerApp.Test
         {
             Task.Run(async () =>
             {
-                ItemsItem itemsItem1 = new ItemsItem();
-                itemsItem1.Name = "Items Item Name 1";
-                itemsItem1._IsComplete = 0;
-                var res1 = await _repository.Add(itemsItem1);
+                Items Items1 = new Items();
+                Items1.Name = "Items Item Name 1";
+                Items1._IsComplete = 0;
+                var res1 = await _repository.Add(Items1);
                 Assert.IsTrue(res1);
 
             }).GetAwaiter().GetResult();
@@ -46,16 +46,16 @@ namespace ContainerApp.Test
         {
             Task.Run(async () =>
             {
-                ItemsItem itemsItem2 = new ItemsItem();
-                itemsItem2.Name = "Items Item Name 2";
-                itemsItem2._IsComplete = 0;
-                var res2 = await _repository.Add(itemsItem2);
+                Items Items2 = new Items();
+                Items2.Name = "Items Item Name 2";
+                Items2._IsComplete = 0;
+                var res2 = await _repository.Add(Items2);
                 Assert.IsTrue(res2);
 
-                ItemsItem itemsItem3 = new ItemsItem();
-                itemsItem3.Name = "Items Item Name 3";
-                itemsItem3._IsComplete = 1;
-                var res3 = await _repository.Add(itemsItem3);
+                Items Items3 = new Items();
+                Items3.Name = "Items Item Name 3";
+                Items3._IsComplete = 1;
+                var res3 = await _repository.Add(Items3);
                 Assert.IsTrue(res3);
 
             }).GetAwaiter().GetResult();

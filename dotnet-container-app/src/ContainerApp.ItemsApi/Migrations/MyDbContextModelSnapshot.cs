@@ -18,7 +18,7 @@ namespace ContainerApp.ItemsApi.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("aspnetcorewebapi.Models.ItemsItem", b =>
+            modelBuilder.Entity("aspnetcorewebapi.Models.Items", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()

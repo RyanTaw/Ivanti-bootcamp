@@ -31,7 +31,7 @@ namespace ContainerApp.WebApp.Controllers
             {
                 _logger.LogInformation("Controller:ItemsController - Method:Index");
 
-                List<ItemsItemModel> lst = new List<ItemsItemModel>();
+                List<ItemsModel> lst = new List<ItemsModel>();
                 string _urlApi = string.Empty;
 
                 using (var httpClient = new HttpClient())
@@ -42,7 +42,7 @@ namespace ContainerApp.WebApp.Controllers
                     using (var response = await httpClient.GetAsync( _urlApi))
                     {
                         string apiResponse = await response.Content.ReadAsStringAsync();
-                        lst = JsonConvert.DeserializeObject<List<ItemsItemModel>>(apiResponse);
+                        lst = JsonConvert.DeserializeObject<List<ItemsModel>>(apiResponse);
                     }
                 }
 
@@ -65,7 +65,7 @@ namespace ContainerApp.WebApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Create(ItemsItemModel model)
+        public async Task<ActionResult> Create(ItemsModel model)
         {
             try
             {
@@ -120,8 +120,8 @@ namespace ContainerApp.WebApp.Controllers
                 using (var response = await httpClient.GetAsync( _urlApi))
                 {
                     string apiResponse = await response.Content.ReadAsStringAsync();
-                    var itemsItem = JsonConvert.DeserializeObject<ItemsItemModel>(apiResponse);
-                    return View(itemsItem);
+                    var Items = JsonConvert.DeserializeObject<ItemsModel>(apiResponse);
+                    return View(Items);
                 }
             }
         }
@@ -141,15 +141,15 @@ namespace ContainerApp.WebApp.Controllers
                 using (var response = await httpClient.GetAsync( _urlApi))
                 {
                     string apiResponse = await response.Content.ReadAsStringAsync();
-                    var itemsItem = JsonConvert.DeserializeObject<ItemsItemModel>(apiResponse);
-                    return View(itemsItem);
+                    var Items = JsonConvert.DeserializeObject<ItemsModel>(apiResponse);
+                    return View(Items);
                 }
             }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Delete(int id, ItemsItemModel model)
+        public async Task<ActionResult> Delete(int id, ItemsModel model)
         {
             try
             {
@@ -204,15 +204,15 @@ namespace ContainerApp.WebApp.Controllers
                 using (var response = await httpClient.GetAsync( _urlApi))
                 {
                     string apiResponse = await response.Content.ReadAsStringAsync();
-                    var itemsItem = JsonConvert.DeserializeObject<ItemsItemModel>(apiResponse);
-                    return View(itemsItem);
+                    var Items = JsonConvert.DeserializeObject<ItemsModel>(apiResponse);
+                    return View(Items);
                 }
             }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit(int id, ItemsItemModel model)
+        public async Task<ActionResult> Edit(int id, ItemsModel model)
         {
             try
             {

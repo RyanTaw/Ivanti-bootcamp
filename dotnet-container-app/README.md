@@ -58,7 +58,7 @@ You will need to configure the ```Connection String``` in file */src/aspnetcorew
 ![Connection String](/docs/images/img10.png "Application")
 
 ```
-Connection String example: *Data Source=(LocalDb)\\MSSQLLocalDB;Initial Catalog=ItemsItem_DB;Integrated Security=SSPI;*
+Connection String example: *Data Source=(LocalDb)\\MSSQLLocalDB;Initial Catalog=Items_DB;Integrated Security=SSPI;*
 ```
 
 To run the application in debug mode, select the *Debug* menu and select the *aspnetcorewebapi & aspnetcorewebapp* option as shown in the image below
