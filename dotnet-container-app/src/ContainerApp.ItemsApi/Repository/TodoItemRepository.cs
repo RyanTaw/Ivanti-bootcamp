@@ -18,27 +18,27 @@ namespace ContainerApp.ItemsApi.Repository
         }
         async Task<bool> IItemsItemRepository.Add(ItemsItem model)
         {
-            _context.ItemsItems.Add(model);
+            _context.Items.Add(model);
             int res = await _context.SaveChangesAsync();
             return true;
         }
 
         async Task<bool> IItemsItemRepository.Delete(int id)
         {
-            var _item = await _context.ItemsItems.FindAsync(id);
-            _context.ItemsItems.Remove(_item);
+            var _item = await _context.Items.FindAsync(id);
+            _context.Items.Remove(_item);
             int res = await _context.SaveChangesAsync();
             return true;
         }
 
         async Task<ItemsItem> IItemsItemRepository.Get(int id)
         {
-            return await _context.ItemsItems.FindAsync(id);
+            return await _context.Items.FindAsync(id);
         }
 
         async Task<List<ItemsItem>> IItemsItemRepository.GetAll()
         {
-            return await _context.ItemsItems.ToListAsync();
+            return await _context.Items.ToListAsync();
         }
 
         async Task<bool> IItemsItemRepository.Update(ItemsItem model)

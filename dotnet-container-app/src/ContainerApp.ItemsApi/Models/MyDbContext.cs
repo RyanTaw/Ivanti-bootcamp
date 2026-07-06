@@ -9,6 +9,6 @@ namespace ContainerApp.ItemsApi.Models
         {
         }
 
-        public DbSet<ItemsItem> ItemsItems { get; set; }
+        public DbSet<ItemsItem> Items { get; set; }
     }
 }

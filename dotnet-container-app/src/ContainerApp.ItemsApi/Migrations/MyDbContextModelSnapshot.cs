@@ -35,7 +35,7 @@ namespace ContainerApp.ItemsApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ItemsItems");
+                    b.ToTable("Items");
                 });
 #pragma warning restore 612, 618
         }

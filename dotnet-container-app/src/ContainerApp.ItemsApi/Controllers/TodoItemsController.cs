@@ -13,12 +13,12 @@ namespace ContainerApp.ItemsApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ItemsItemsController : ControllerBase
+    public class ItemsController : ControllerBase
     {
         private IItemsItemRepository _repository;
-        private ILogger<ItemsItemsController> _logger;
+        private ILogger<ItemsController> _logger;
 
-        public ItemsItemsController(IItemsItemRepository repository, ILogger<ItemsItemsController> logger)
+        public ItemsController(IItemsItemRepository repository, ILogger<ItemsController> logger)
         {
             _repository = repository;
             _logger = logger;
@@ -26,11 +26,11 @@ namespace ContainerApp.ItemsApi.Controllers
 
         // GET ALL
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ItemsItem>>> GetItemsItems()
+        public async Task<ActionResult<IEnumerable<ItemsItem>>> GetItems()
         {
             try
             {
-                _logger.LogInformation("Method - GetItemsItems");
+                _logger.LogInformation("Method - GetItems");
                 return await _repository.GetAll();
             }
             catch(Exception ex)

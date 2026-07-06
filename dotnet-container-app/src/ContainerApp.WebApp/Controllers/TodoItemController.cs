@@ -36,7 +36,7 @@ namespace ContainerApp.WebApp.Controllers
 
                 using (var httpClient = new HttpClient())
                 {
-                    _urlApi = _config["ApiAddress"].ToString() + "/api/ItemsItems";
+                    _urlApi = _config["ApiAddress"].ToString() + "/api/Items";
                     _logger.LogInformation("URL API = " + _urlApi);
 
                     using (var response = await httpClient.GetAsync( _urlApi))
@@ -73,7 +73,7 @@ namespace ContainerApp.WebApp.Controllers
 
                 if (ModelState.IsValid)
                 {
-                    string _urlApi = _config["ApiAddress"].ToString() + "/api/ItemsItems";
+                    string _urlApi = _config["ApiAddress"].ToString() + "/api/Items";
                     _logger.LogInformation("URL API = " + _urlApi);
                     _logger.LogInformation("MODEL = " + JsonConvert.SerializeObject(model));
 
@@ -114,7 +114,7 @@ namespace ContainerApp.WebApp.Controllers
 
             using (var httpClient = new HttpClient())
             {
-                _urlApi = _config["ApiAddress"].ToString() + "/api/ItemsItems/" + id;
+                _urlApi = _config["ApiAddress"].ToString() + "/api/Items/" + id;
                 _logger.LogInformation("URL API = " + _urlApi);
 
                 using (var response = await httpClient.GetAsync( _urlApi))
@@ -135,7 +135,7 @@ namespace ContainerApp.WebApp.Controllers
 
             using (var httpClient = new HttpClient())
             {
-                _urlApi = _config["ApiAddress"].ToString() + "/api/ItemsItems/" + id;
+                _urlApi = _config["ApiAddress"].ToString() + "/api/Items/" + id;
                 _logger.LogInformation("URL API = " + _urlApi);
 
                 using (var response = await httpClient.GetAsync( _urlApi))
@@ -158,7 +158,7 @@ namespace ContainerApp.WebApp.Controllers
 
                 if (id > 0 )
                 {
-                    string _urlApi = _config["ApiAddress"].ToString() + "/api/ItemsItems/" + id;
+                    string _urlApi = _config["ApiAddress"].ToString() + "/api/Items/" + id;
                     _logger.LogInformation("URL API = " + _urlApi);
                     _logger.LogInformation("MODEL = " + JsonConvert.SerializeObject(model));
 
@@ -198,7 +198,7 @@ namespace ContainerApp.WebApp.Controllers
 
             using (var httpClient = new HttpClient())
             {
-                _urlApi = _config["ApiAddress"].ToString() + "/api/ItemsItems/" + id;
+                _urlApi = _config["ApiAddress"].ToString() + "/api/Items/" + id;
                 _logger.LogInformation("URL API = " + _urlApi);
 
                 using (var response = await httpClient.GetAsync( _urlApi))
@@ -221,7 +221,7 @@ namespace ContainerApp.WebApp.Controllers
                 
                 if (ModelState.IsValid)
                 {
-                    string _urlApi = _config["ApiAddress"].ToString() + "/api/ItemsItems/" + id;
+                    string _urlApi = _config["ApiAddress"].ToString() + "/api/Items/" + id;
                     _logger.LogInformation("URL API = " + _urlApi);
                     _logger.LogInformation("MODEL = " + JsonConvert.SerializeObject(model));
 

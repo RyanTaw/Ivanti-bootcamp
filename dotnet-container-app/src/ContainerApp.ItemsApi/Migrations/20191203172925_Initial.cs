@@ -7,7 +7,7 @@ namespace ContainerApp.ItemsApi.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "ItemsItems",
+                name: "Items",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
@@ -17,14 +17,14 @@ namespace ContainerApp.ItemsApi.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ItemsItems", x => x.Id);
+                    table.PrimaryKey("PK_Items", x => x.Id);
                 });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "ItemsItems");
+                name: "Items");
         }
     }
 }
