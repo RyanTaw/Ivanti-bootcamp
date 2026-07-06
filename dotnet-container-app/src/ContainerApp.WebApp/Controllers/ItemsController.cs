@@ -13,13 +13,13 @@ using Newtonsoft.Json;
 
 namespace ContainerApp.WebApp.Controllers
 {
-    public class ItemsItemController : Controller
+    public class ItemsController : Controller
     {
-        private readonly ILogger<ItemsItemController> _logger;
+        private readonly ILogger<ItemsController> _logger;
         private readonly IConfiguration _config;
         private static readonly HttpClient client = new HttpClient();
 
-        public ItemsItemController(ILogger<ItemsItemController> logger, IConfiguration config)
+        public ItemsController(ILogger<ItemsController> logger, IConfiguration config)
         {
             _config = config;
             _logger = logger;
@@ -29,7 +29,7 @@ namespace ContainerApp.WebApp.Controllers
         {
             try
             {
-                _logger.LogInformation("Controller:ItemsItemController - Method:Index");
+                _logger.LogInformation("Controller:ItemsController - Method:Index");
 
                 List<ItemsItemModel> lst = new List<ItemsItemModel>();
                 string _urlApi = string.Empty;
@@ -59,7 +59,7 @@ namespace ContainerApp.WebApp.Controllers
 
         public ActionResult Create()
         {
-            _logger.LogInformation("Controller:ItemsItemController - Method:Create");
+            _logger.LogInformation("Controller:ItemsController - Method:Create");
             return View();
         }
 
@@ -69,7 +69,7 @@ namespace ContainerApp.WebApp.Controllers
         {
             try
             {
-                _logger.LogInformation("Controller:ItemsItemController - Method:Create");
+                _logger.LogInformation("Controller:ItemsController - Method:Create");
 
                 if (ModelState.IsValid)
                 {
@@ -107,7 +107,7 @@ namespace ContainerApp.WebApp.Controllers
 
         public async Task<ActionResult> Details(int id)
         {
-            _logger.LogInformation("Controller:ItemsItemController - Method:Details");
+            _logger.LogInformation("Controller:ItemsController - Method:Details");
             _logger.LogInformation("Parameter ID: " + id.ToString());
             
             string _urlApi = string.Empty;
@@ -128,7 +128,7 @@ namespace ContainerApp.WebApp.Controllers
 
         public async Task<ActionResult> Delete(int id)
         {
-            _logger.LogInformation("Controller:ItemsItemController - Method:Delete");
+            _logger.LogInformation("Controller:ItemsController - Method:Delete");
             _logger.LogInformation("Parameter ID: " + id.ToString());
             
             string _urlApi = string.Empty;
@@ -153,7 +153,7 @@ namespace ContainerApp.WebApp.Controllers
         {
             try
             {
-                _logger.LogInformation("Controller:ItemsItemController - Method:Delete");
+                _logger.LogInformation("Controller:ItemsController - Method:Delete");
                 _logger.LogInformation("Parameter ID: " + id.ToString());
 
                 if (id > 0 )
@@ -193,7 +193,7 @@ namespace ContainerApp.WebApp.Controllers
         {
             string _urlApi = string.Empty;
 
-            _logger.LogInformation("Controller:ItemsItemController - Method:Edit");
+            _logger.LogInformation("Controller:ItemsController - Method:Edit");
             _logger.LogInformation("Parameter ID: " + id.ToString());
 
             using (var httpClient = new HttpClient())
@@ -216,7 +216,7 @@ namespace ContainerApp.WebApp.Controllers
         {
             try
             {
-                _logger.LogInformation("Controller:ItemsItemController - Method:Edit");
+                _logger.LogInformation("Controller:ItemsController - Method:Edit");
                 _logger.LogInformation("Parameter ID: " + id.ToString());
                 
                 if (ModelState.IsValid)
