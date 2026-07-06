@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
-namespace ContainerApp.ItemsApi.Controllers
+namespace ContainerApp.TodoApi.Controllers
 {
         
     [Route("api/[controller]")]

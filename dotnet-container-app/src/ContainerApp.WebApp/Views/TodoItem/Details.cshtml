@@ -1,7 +1,7 @@
-@model ContainerApp.WebApp.Models.ItemsModel
+@model ContainerApp.WebApp.Models.TodoItemModel
 
 @{
-    ViewData["Title"] = "Items - Details";
+    ViewData["Title"] = "TodoItem - Details";
 }
 
 <h4>Details</h4>
@@ -30,7 +30,7 @@
     </dl>
 </div>
 <div>
-    @Html.ActionLink("Edit", "Edit", "Items", new { id = Model.Id }, new { @class = "btn btn-primary" }) |
-    @Html.ActionLink("Delete", "Delete", "Items", new { id = Model.Id }, new { @class = "btn btn-primary" }) |
+    @Html.ActionLink("Edit", "Edit", "TodoItem", new { id = Model.Id }, new { @class = "btn btn-primary" }) |
+    @Html.ActionLink("Delete", "Delete", "TodoItem", new { id = Model.Id }, new { @class = "btn btn-primary" }) |
     <a asp-action="Index" class="btn btn-info">Voltar</a>
 </div>

@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ContainerApp.ItemsApi\ContainerApp.ItemsApi.csproj" />
+    <ProjectReference Include="..\ContainerApp.TodoApi\ContainerApp.TodoApi.csproj" />
   </ItemGroup>
 
 </Project>

@@ -13,13 +13,13 @@ using Newtonsoft.Json;
 
 namespace ContainerApp.WebApp.Controllers
 {
-    public class ItemsController : Controller
+    public class TodoItemController : Controller
     {
-        private readonly ILogger<ItemsController> _logger;
+        private readonly ILogger<TodoItemController> _logger;
         private readonly IConfiguration _config;
         private static readonly HttpClient client = new HttpClient();
 
-        public ItemsController(ILogger<ItemsController> logger, IConfiguration config)
+        public TodoItemController(ILogger<TodoItemController> logger, IConfiguration config)
         {
             _config = config;
             _logger = logger;
@@ -29,20 +29,20 @@ namespace ContainerApp.WebApp.Controllers
         {
             try
             {
-                _logger.LogInformation("Controller:ItemsController - Method:Index");
+                _logger.LogInformation("Controller:TodoItemController - Method:Index");
 
-                List<ItemsModel> lst = new List<ItemsModel>();
+                List<TodoItemModel> lst = new List<TodoItemModel>();
                 string _urlApi = string.Empty;
 
                 using (var httpClient = new HttpClient())
                 {
-                    _urlApi = _config["ApiAddress"].ToString() + "/api/Items";
+                    _urlApi = _config["ApiAddress"].ToString() + "/api/TodoItems";
                     _logger.LogInformation("URL API = " + _urlApi);
 
                     using (var response = await httpClient.GetAsync( _urlApi))
                     {
                         string apiResponse = await response.Content.ReadAsStringAsync();
-                        lst = JsonConvert.DeserializeObject<List<ItemsModel>>(apiResponse);
+                        lst = JsonConvert.DeserializeObject<List<TodoItemModel>>(apiResponse);
                     }
                 }
 
@@ -59,21 +59,21 @@ namespace ContainerApp.WebApp.Controllers
 
         public ActionResult Create()
         {
-            _logger.LogInformation("Controller:ItemsController - Method:Create");
+            _logger.LogInformation("Controller:TodoItemController - Method:Create");
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Create(ItemsModel model)
+        public async Task<ActionResult> Create(TodoItemModel model)
         {
             try
             {
-                _logger.LogInformation("Controller:ItemsController - Method:Create");
+                _logger.LogInformation("Controller:TodoItemController - Method:Create");
 
                 if (ModelState.IsValid)
                 {
-                    string _urlApi = _config["ApiAddress"].ToString() + "/api/Items";
+                    string _urlApi = _config["ApiAddress"].ToString() + "/api/TodoItems";
                     _logger.LogInformation("URL API = " + _urlApi);
                     _logger.LogInformation("MODEL = " + JsonConvert.SerializeObject(model));
 
@@ -107,58 +107,58 @@ namespace ContainerApp.WebApp.Controllers
 
         public async Task<ActionResult> Details(int id)
         {
-            _logger.LogInformation("Controller:ItemsController - Method:Details");
+            _logger.LogInformation("Controller:TodoItemController - Method:Details");
             _logger.LogInformation("Parameter ID: " + id.ToString());
             
             string _urlApi = string.Empty;
 
             using (var httpClient = new HttpClient())
             {
-                _urlApi = _config["ApiAddress"].ToString() + "/api/Items/" + id;
+                _urlApi = _config["ApiAddress"].ToString() + "/api/TodoItems/" + id;
                 _logger.LogInformation("URL API = " + _urlApi);
 
                 using (var response = await httpClient.GetAsync( _urlApi))
                 {
                     string apiResponse = await response.Content.ReadAsStringAsync();
-                    var Items = JsonConvert.DeserializeObject<ItemsModel>(apiResponse);
-                    return View(Items);
+                    var todoItem = JsonConvert.DeserializeObject<TodoItemModel>(apiResponse);
+                    return View(todoItem);
                 }
             }
         }
 
         public async Task<ActionResult> Delete(int id)
         {
-            _logger.LogInformation("Controller:ItemsController - Method:Delete");
+            _logger.LogInformation("Controller:TodoItemController - Method:Delete");
             _logger.LogInformation("Parameter ID: " + id.ToString());
             
             string _urlApi = string.Empty;
 
             using (var httpClient = new HttpClient())
             {
-                _urlApi = _config["ApiAddress"].ToString() + "/api/Items/" + id;
+                _urlApi = _config["ApiAddress"].ToString() + "/api/TodoItems/" + id;
                 _logger.LogInformation("URL API = " + _urlApi);
 
                 using (var response = await httpClient.GetAsync( _urlApi))
                 {
                     string apiResponse = await response.Content.ReadAsStringAsync();
-                    var Items = JsonConvert.DeserializeObject<ItemsModel>(apiResponse);
-                    return View(Items);
+                    var todoItem = JsonConvert.DeserializeObject<TodoItemModel>(apiResponse);
+                    return View(todoItem);
                 }
             }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Delete(int id, ItemsModel model)
+        public async Task<ActionResult> Delete(int id, TodoItemModel model)
         {
             try
             {
-                _logger.LogInformation("Controller:ItemsController - Method:Delete");
+                _logger.LogInformation("Controller:TodoItemController - Method:Delete");
                 _logger.LogInformation("Parameter ID: " + id.ToString());
 
                 if (id > 0 )
                 {
-                    string _urlApi = _config["ApiAddress"].ToString() + "/api/Items/" + id;
+                    string _urlApi = _config["ApiAddress"].ToString() + "/api/TodoItems/" + id;
                     _logger.LogInformation("URL API = " + _urlApi);
                     _logger.LogInformation("MODEL = " + JsonConvert.SerializeObject(model));
 
@@ -193,35 +193,35 @@ namespace ContainerApp.WebApp.Controllers
         {
             string _urlApi = string.Empty;
 
-            _logger.LogInformation("Controller:ItemsController - Method:Edit");
+            _logger.LogInformation("Controller:TodoItemController - Method:Edit");
             _logger.LogInformation("Parameter ID: " + id.ToString());
 
             using (var httpClient = new HttpClient())
             {
-                _urlApi = _config["ApiAddress"].ToString() + "/api/Items/" + id;
+                _urlApi = _config["ApiAddress"].ToString() + "/api/TodoItems/" + id;
                 _logger.LogInformation("URL API = " + _urlApi);
 
                 using (var response = await httpClient.GetAsync( _urlApi))
                 {
                     string apiResponse = await response.Content.ReadAsStringAsync();
-                    var Items = JsonConvert.DeserializeObject<ItemsModel>(apiResponse);
-                    return View(Items);
+                    var todoItem = JsonConvert.DeserializeObject<TodoItemModel>(apiResponse);
+                    return View(todoItem);
                 }
             }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit(int id, ItemsModel model)
+        public async Task<ActionResult> Edit(int id, TodoItemModel model)
         {
             try
             {
-                _logger.LogInformation("Controller:ItemsController - Method:Edit");
+                _logger.LogInformation("Controller:TodoItemController - Method:Edit");
                 _logger.LogInformation("Parameter ID: " + id.ToString());
                 
                 if (ModelState.IsValid)
                 {
-                    string _urlApi = _config["ApiAddress"].ToString() + "/api/Items/" + id;
+                    string _urlApi = _config["ApiAddress"].ToString() + "/api/TodoItems/" + id;
                     _logger.LogInformation("URL API = " + _urlApi);
                     _logger.LogInformation("MODEL = " + JsonConvert.SerializeObject(model));
 

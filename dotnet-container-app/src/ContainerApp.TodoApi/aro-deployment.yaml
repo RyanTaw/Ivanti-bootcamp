@@ -1,11 +1,11 @@
 ﻿kind: Service
 apiVersion: v1
 metadata:
-  name: containerapp-itemsapi-svc
+  name: containerapp-todoapi-svc
 spec:
   type: ClusterIP
   selector:
-    app: containerapp-itemsapi
+    app: containerapp-todoapi
     tier: backend
   ports:
     - protocol: TCP
@@ -15,21 +15,21 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: containerapp-itemsapi-deploy
+  name: containerapp-todoapi-deploy
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: containerapp-itemsapi
+      app: containerapp-todoapi
       tier: backend
   template:
     metadata:
       labels:
-        app: containerapp-itemsapi
+        app: containerapp-todoapi
         tier: backend
     spec:
       containers:
-        - name: containerapp-itemsapi
+        - name: containerapp-todoapi
           image: "_ImageUrlApi_"
           env:
             - name: MyDbContext
@@ -50,12 +50,12 @@ spec:
 kind: Route
 apiVersion: route.openshift.io/v1
 metadata:
-  name: containerapp-itemsapi
+  name: containerapp-todoapi
   namespace: default
 spec:
   path: /
   to:
     kind: Service
-    name: containerapp-itemsapi-svc
+    name: containerapp-todoapi-svc
   port:
     targetPort: 80

@@ -33,7 +33,7 @@ spec:
           image: "_ImageUrlApp_"
           env:
             - name: ApiAddress
-              value: "http://containerapp-itemsapi-svc.default.svc.cluster.local"
+              value: "http://containerapp-todoapi-svc.default.svc.cluster.local"
             - name: WeatherApi
               value: "http://containerapp-weatherapi-svc.default.svc.cluster.local"
           ports:

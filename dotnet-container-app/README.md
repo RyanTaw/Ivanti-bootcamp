@@ -11,9 +11,9 @@ This is the application architecture diagram
 The project is divided as follows:
 
 - **src/ContainerApp.IAC:** Bicep files for create Azure environment
-- **src/ContainerApp.ItemsApi:** ITEMS API to communicate with SQL Server database
+- **src/ContainerApp.TodoApi:** TODO API to communicate with SQL Server database
 - **src/ContainerApp.WeatherApi:** WEATHER API simulates weather forecasts
-- **src/ContainerApp.WebApp:** Web Application interact with rest ITEMS API and
+- **src/ContainerApp.WebApp:** Web Application interact with rest TODO API and
 - **src/ContainerApp.Test:** Unit Testing project
 
 This sample application can use the following Azure features:
@@ -58,7 +58,7 @@ You will need to configure the ```Connection String``` in file */src/aspnetcorew
 ![Connection String](/docs/images/img10.png "Application")
 
 ```
-Connection String example: *Data Source=(LocalDb)\\MSSQLLocalDB;Initial Catalog=Items_DB;Integrated Security=SSPI;*
+Connection String example: *Data Source=(LocalDb)\\MSSQLLocalDB;Initial Catalog=TodoItem_DB;Integrated Security=SSPI;*
 ```
 
 To run the application in debug mode, select the *Debug* menu and select the *aspnetcorewebapi & aspnetcorewebapp* option as shown in the image below

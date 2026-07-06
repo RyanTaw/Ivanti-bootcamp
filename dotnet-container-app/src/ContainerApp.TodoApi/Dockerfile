@@ -15,4 +15,4 @@ COPY --from=build /api/out .
 # Set port
 # ENV ASPNETCORE_URLS="http://0.0.0.0:5000"
 
-ENTRYPOINT ["dotnet", "ContainerApp.ItemsApi.dll"]
+ENTRYPOINT ["dotnet", "ContainerApp.TodoApi.dll"]
