@@ -73,4 +73,4 @@ kubectl rollout restart deployment/containerapp-webapp-deploy -n bootcamp
 kubectl rollout status deployment/containerapp-webapp-deploy -n bootcamp
 
 Endpoint
-http://20.242.237.226
+http://57.151.76.24
