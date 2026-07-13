@@ -60,10 +60,10 @@ variables:
     value: '$(appDirectory)/src/ContainerApp.TodoApi/Dockerfile'
 
   - name: acrName
-    value: 'avantiavantibootcampacr'
+    value: 'avantibootcampacr'
 
   - name: containerRegistry
-    value: 'avantiavantibootcampacr.azurecr.io'
+    value: 'avantibootcampacr.azurecr.io'
 
   - name: webImageRepository
     value: 'containerapp-web'
@@ -78,10 +78,10 @@ variables:
     value: '$(Build.BuildId)'
 
   - name: resourceGroupName
-    value: 'avanti-avanti-bootcamp-rg'
+    value: 'avanti-bootcamp-rg'
 
   - name: aksClusterName
-    value: 'avanti-avanti-bootcamp-aks'
+    value: 'avanti-bootcamp-aks'
 
   - name: namespace
     value: 'bootcamp'

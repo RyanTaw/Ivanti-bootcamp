@@ -1,5 +1,5 @@
 locals {
-  prefix = "avanti-${var.resource_name}"
+  prefix = "${var.resource_name}"
 
   tags = {
     Environment = "DEV"

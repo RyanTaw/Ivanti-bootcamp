@@ -32,7 +32,7 @@ spec:
     spec:
       containers:
         - name: containerapp-webapp
-          image: avantiavantibootcampacr.azurecr.io/containerapp-web:latest
+          image: avantibootcampacr.azurecr.io/containerapp-web:latest
           env:
             - name: ApiAddress
               value: "http://containerapp-todoapi-svc.bootcamp.svc.cluster.local"
