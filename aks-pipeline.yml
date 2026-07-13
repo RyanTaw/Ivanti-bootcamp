@@ -191,6 +191,11 @@ stages:
                   --resource-group "$(resourceGroupName)" \
                   --name "$(aksClusterName)" \
                   --overwrite-existing
+                
+                az aks update \
+                  --name "$(aksClusterName)" \
+                  --resource-group "$(resourceGroupName)" \
+                  --attach-acr "$(acrName)"
 
                 kubectl create namespace "$(namespace)" --dry-run=client -o yaml | kubectl apply -f -
 

@@ -51,6 +51,8 @@ kubectl logs deployment/containerapp-webapp-deploy -n bootcamp
 kubectl get services --all-namespaces
 kubectl get pods --all-namespaces 
 
+az aks update --name avanti-bootcamp-aks  --resource-group avanti-bootcamp-rg --attach-acr avantibootcampacr
+
 SQLdb cmds
 az sql server create --name avanti-bootcamp-sql --resource-group avanti-bootcamp-rg --location centralus --admin-user sqladminuser --admin-password "Ryanpassword123!"
 
